@@ -55,7 +55,8 @@ class Iconizr {
 		'dims'		=> 0,
 		'verbose'	=> 0,
 		'keep'		=> 0,
-		'threshold'	=> self::DEFAULT_THRESHOLD,
+		'svg'		=> self::DEFAULT_THRESHOLD_SVG,
+		'png'		=> self::DEFAULT_THRESHOLD_PNG,
 	);
 	/**
 	 * Supporting binaries
@@ -148,6 +149,12 @@ class Iconizr {
 	 */
 	protected $_dimensions = array();
 	/**
+	 * Icon names
+	 * 
+	 * @var array
+	 */
+	protected $_iconNames = array();
+	/**
 	 * CSS class prefix
 	 * 
 	 * @var string
@@ -166,11 +173,14 @@ class Iconizr {
 	 */
 	protected $_optimization = 2;
 	/**
-	 * Effective data URI byte threshold
+	 * Effective data URI byte thresholds
 	 * 
 	 * @var int
 	 */
-	protected $_threshold = self::DEFAULT_THRESHOLD;
+	protected $_thresholds = array(
+		self::SVG			=> self::DEFAULT_THRESHOLD_SVG,
+		self::PNG			=> self::DEFAULT_THRESHOLD_PNG,
+	);
 	/**
 	 * Flags
 	 * 
@@ -226,11 +236,17 @@ class Iconizr {
 	 */
 	const DEFAULT_FILE = 'iconizr';
 	/**
-	 * Default byte threshold for data URIs
+	 * Default byte threshold for SVG data URIs
+	 *
+	 * @var int
+	 */
+	const DEFAULT_THRESHOLD_SVG = 1048576;
+	/**
+	 * Default byte threshold for PNG data URIs
 	 * 
 	 * @var int
 	 */
-	const DEFAULT_THRESHOLD = 32768;
+	const DEFAULT_THRESHOLD_PNG = 32768;
 	
 	/************************************************************************************************
 	 * PUBLIC METHODS
@@ -257,7 +273,8 @@ class Iconizr {
 				'out|o=s'						=> 'Output directory',
 				'prefix|p=s'					=> 'CSS class prefix (default: '.self::DEFAULT_PREFIX.')',
 				'level|l=i'						=> 'PNG image optimization level: 0 (fast & rough) - 10 (slow & high quality), default: '.self::DEFAULT_LEVEL,
-				'threshold|t-i'					=> 'Data URI byte threshold, default: '.self::DEFAULT_THRESHOLD,
+				'svg=i'							=> 'Data URI byte threshold for SVG files, default: '.self::DEFAULT_THRESHOLD_SVG,
+				'png=i'							=> 'Data URI byte threshold for PNG files, default: '.self::DEFAULT_THRESHOLD_PNG,
 				'css|c-s'						=> 'Render CSS files (optionally provide a CSS file prefix, default: iconizr)',
 				'sass|s-s'						=> 'Render Sass files (optionally provide a Sass file prefix, default: iconizr)',
 				'quantize|q'					=> 'Quantize PNG images (reduce to 8-bit color depth)',
@@ -297,7 +314,8 @@ class Iconizr {
 		$level									= max(0, min(10, intval($options['level'])));
 		$this->_speed							= 10 - $level;
 		$this->_optimization					= round($level * 7/10);
-		$this->_threshold						= max(1024, intval($options['threshold']));
+		$this->_thresholds[self::SVG]			= max(1024, intval($options['svg']));
+		$this->_thresholds[self::PNG]			= max(1024, intval($options['png']));
 		$this->_flags['css']					= (is_string($options['css']) && strlen(trim($options['css']))) ? trim($options['css']) : (intval($options['css']) ? self::DEFAULT_FILE : false);
 		$this->_flags['sass']					= (is_string($options['sass']) && strlen(trim($options['sass']))) ? trim($options['sass']) : (intval($options['sass']) ? self::DEFAULT_FILE : false);
 		$this->_flags['verbose']				= intval($options['verbose']);
@@ -313,6 +331,7 @@ class Iconizr {
 			$outputElements[]					= $this->_target.$this->_flags['css'].'-png-data.css';
 			$outputElements[]					= $this->_target.$this->_flags['css'].'-png-sprite.css';
 			$outputElements[]					= $this->_target.$this->_flags['css'].'-loader-fragment.html';
+			$outputElements[]					= $this->_target.$this->_flags['css'].'-preview.php';
 		}
 		if ($this->_flags['sass'] !== false) {
 			$outputElements[]					= $this->_target.$this->_flags['sass'].'-svg-data.scss';
@@ -388,7 +407,7 @@ class Iconizr {
 			
 			// Write the loader fragment
 			if (count($cssFiles)) {
-				$this->_createLoaderFragment($cssFiles);
+				$this->_createPreviewAndLoaderFragment($cssFiles);
 			}
 			
 		// Else
@@ -408,13 +427,35 @@ class Iconizr {
 	 * @param array $css				Generated CSS files
 	 * @return void
 	 */
-	protected function _createLoaderFragment(array $css) {
+	protected function _createPreviewAndLoaderFragment(array $css) {
 		$this->_log('Creating stylesheet loader fragment');
-		$loader									= '<script>';
-		$loader									.= '/* iconizr | https://github.com/jkphl/iconizr | © 2013 Joschi Kuphal | CC BY 3.0 */';
-		$loader									.= sprintf(file_get_contents(__DIR__.DIRECTORY_SEPARATOR.'iconizr.min.js'), htmlspecialchars($css[self::PNG][self::SPRITE]), htmlspecialchars($css[self::PNG][self::DATA]), htmlspecialchars($css[self::SVG][self::SPRITE]), htmlspecialchars($css[self::SVG][self::DATA]));
-		$loader									.= '</script><noscript><link href="'.htmlspecialchars($css[self::PNG][self::SPRITE]).'" rel="stylesheet"></noscript>';
-		file_put_contents($this->_target.$this->_flags['css'].'-loader-fragment.html', $loader);
+		$loader											= '<script>';
+		$loader											.= '/* iconizr | https://github.com/jkphl/iconizr | © 2013 Joschi Kuphal | CC BY 3.0 */';
+		$loader											.= file_get_contents(__DIR__.DIRECTORY_SEPARATOR.'iconizr.min.js');
+		$loader											.= '</script><noscript><link href="'.htmlspecialchars($css[self::PNG][self::SPRITE]).'" rel="stylesheet"></noscript>';
+		file_put_contents($this->_target.$this->_flags['css'].'-loader-fragment.html', sprintf($loader, htmlspecialchars($css[self::PNG][self::SPRITE]), htmlspecialchars($css[self::PNG][self::DATA]), htmlspecialchars($css[self::SVG][self::SPRITE]), htmlspecialchars($css[self::SVG][self::DATA])));
+		
+		$this->_log('Creating preview document');
+		$stylesheets									= array(
+			''											=> 'Automatic detection',
+			basename($css[self::PNG][self::SPRITE])		=> 'PNG sprite',
+			basename($css[self::PNG][self::DATA])		=> 'PNG data URIs',
+			basename($css[self::SVG][self::SPRITE])		=> 'SVG sprite',
+			basename($css[self::SVG][self::DATA])		=> 'SVG data URIs',
+				
+		);
+		$preview										= '<?php $stylesheets = '.var_export($stylesheets, true).'; $stylesheet = empty($_POST["stylesheet"]) ? "" : $_POST["stylesheet"]; ?>';
+		$preview										.= '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>iconizr Icon Preview</title>';
+		$preview										.= '<?php if ($stylesheet == ""): ?>';
+		$preview										.= sprintf($loader, htmlspecialchars(basename($css[self::PNG][self::SPRITE])), htmlspecialchars(basename($css[self::PNG][self::DATA])), htmlspecialchars(basename($css[self::SVG][self::SPRITE])), htmlspecialchars(basename($css[self::SVG][self::DATA])));
+		$preview										.= '<?php else: ?><link href="<?php echo htmlspecialchars($stylesheet); ?>" rel="stylesheet" type="text/css"/><?php endif; ?>';
+		$preview										.= '<style>body{padding:2em;margin:0}body,p,h1{font-family:Arial,Helvetica,sans-serif}ul{margin:0,padding:0}li{margin:2em 0}.icon{background-color:#eee}</style></head><body>';
+		$preview										.= '<form method="post"><h1>iconizr Icon Preview</h1><p>Please choose the icon rendering type: <select name="stylesheet"><?php foreach($stylesheets as $value => $label): ?><option value="<?php echo htmlspecialchars($value); ?>"<?php if($stylesheet == $value) echo \' selected="selected"\'; ?>><?php echo htmlspecialchars($label); ?></option><?php endforeach; ?></select><input type="submit" value="Set rendering type"/></p><ol>';
+		foreach ($this->_iconNames as $icon) {
+			$preview									.= '<li><div>'.$icon.'</div><div class="icon '.$icon.' '.$icon.'-dims"></div></li>';
+		}
+		$preview										.= '</ol></form></body></html>';
+		file_put_contents($this->_target.$this->_flags['css'].'-preview.php', $preview);
 	}
 	
 	/**
@@ -471,6 +512,7 @@ class Iconizr {
 		// Run through all icons
 		foreach ($icons as $icon) {
 			$iconName							= pathinfo($icon, PATHINFO_FILENAME);
+			$this->_iconNames[]					= (strlen($this->_prefix) ? $this->_prefix : $this->_tmpName).'-'.$iconName;
 			$targetIcon							= $this->_tmpDir.DIRECTORY_SEPARATOR.$icon;
 			$this->_tmpResources[]				= $targetIcon;
 				
@@ -494,9 +536,9 @@ class Iconizr {
 			// Create a data URI from this SVG if sprite mode is not active (yet)
 			if (is_array($this->_dataUris[$directory][self::SVG])) {
 				$this->_dataUris[$directory][self::SVG][$iconName]		= 'data:image/svg+xml,'.rawurlencode(@file_get_contents($targetIcon));
-				if (strlen($this->_dataUris[$directory][self::SVG][$iconName]) > $this->_threshold) {
+				if (($dataUriLength = strlen($this->_dataUris[$directory][self::SVG][$iconName])) > $this->_thresholds[self::SVG]) {
 					$this->_dataUris[$directory][self::SVG]				= false;
-					$this->_log(sprintf('>>> Data URI for icon "%s" exceeds '.$this->_threshold.' byte limit, switching to SVG sprite only mode', $icon));
+					$this->_log(sprintf('>>> Data URI for icon "%s" exceeds %s byte limit (%s), switching to SVG sprite only mode', $icon, $this->_thresholds[self::SVG], $dataUriLength));
 				}
 			}
 		
@@ -573,9 +615,9 @@ class Iconizr {
 				// Create a data URI from this optimized PNG if sprite mode is not active (yet)
 				if (is_array($this->_dataUris[$directory][self::PNG])) {
 					$this->_dataUris[$directory][self::PNG][$iconName]			= 'data:image/png;base64,'.base64_encode(file_get_contents($png));
-					if (strlen($this->_dataUris[$directory][self::PNG][$iconName]) > $this->_threshold) {
+					if (($dataUriLength = strlen($this->_dataUris[$directory][self::PNG][$iconName])) > $this->_thresholds[self::PNG]) {
 						$this->_dataUris[$directory][self::PNG]					= false;
-						$this->_log(sprintf('>>> Data URI for icon "%s" exceeds '.$this->_threshold.' byte limit, switching to PNG sprite only mode', basename($png)));
+						$this->_log(sprintf('>>> Data URI for icon "%s" exceeds %s byte limit (%s), switching to PNG sprite only mode', basename($png), $this->_thresholds[self::PNG], $dataUriLength));
 					}
 				}
 			}
@@ -798,7 +840,7 @@ class Iconizr {
 		$this->_log('|-- Optimizing the PNG sprite ...');
 		chdir($this->_target);
 		$optimizedSprite											= $this->_optimizePNGImages(array('sprite' => $this->_target.$spritePath));
-		$optimizedSprite											= $this->_target.$optimizedSprite[$this->_target.$spritePath];
+		$optimizedSprite											= $this->_target.$this->_tmpName.DIRECTORY_SEPARATOR.$optimizedSprite[$this->_target.$spritePath];
 		if (($optimizedSprite != $this->_target.$spritePath) && (filesize($optimizedSprite) < filesize($this->_target.$spritePath))) {
 			unlink($this->_target.$spritePath);
 			rename($optimizedSprite, $this->_target.$spritePath);

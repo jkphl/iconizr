@@ -1,0 +1,4 @@
+# Deflating for text files
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css image/svg+xml
+</IfModule>
