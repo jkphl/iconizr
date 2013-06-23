@@ -312,8 +312,8 @@ class Iconizr {
 
 		// Determine quantize speed, optimization level and other flags
 		$level									= max(0, min(10, intval($options['level'])));
-		$this->_speed							= 10 - $level;
-		$this->_optimization					= round($level * 7/10);
+		$this->_speed							= round(10 - (9 * $level / 10));
+		$this->_optimization					= round($level * 7 / 10);
 		$this->_thresholds[self::SVG]			= max(1024, intval($options['svg']));
 		$this->_thresholds[self::PNG]			= max(1024, intval($options['png']));
 		$this->_flags['css']					= (is_string($options['css']) && strlen(trim($options['css']))) ? trim($options['css']) : (intval($options['css']) ? self::DEFAULT_FILE : false);

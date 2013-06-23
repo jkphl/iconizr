@@ -27,9 +27,9 @@ Evtl. kein Limit für data-URIs bei SVG? Welcher Browser mit SVG-Support hat das
 		<td>2</td>
 	</tr>
 	<tr>
-		<td>Size</td>
-		<td>33.3 KB (31.2 KB)</td>
-		<td>21.3 KB (22.3 KB)</td>
+		<td>Size (KB)</td>
+		<td>33.3 / 31.2</td>
+		<td>20.0 / 21.1</td>
 	</tr>
 	<tr>
 		<td rowspan="2">PNG data URI</td>
@@ -38,9 +38,9 @@ Evtl. kein Limit für data-URIs bei SVG? Welcher Browser mit SVG-Support hat das
 		<td>1</td>
 	</tr>
 	<tr>
-		<td>Size</td>
-		<td>30.1 KB (41.1 KB)</td>
-		<td>26.2 KB (35.8 KB)</td>
+		<td>Size (KB)</td>
+		<td>30.1 / 41.1</td>
+		<td>20.3 / 29.7</td>
 	</tr>
 	<tr>
 		<td rowspan="2">SVG sprite</td>
@@ -49,9 +49,9 @@ Evtl. kein Limit für data-URIs bei SVG? Welcher Browser mit SVG-Support hat das
 		<td>2</td>
 	</tr>
 	<tr>
-		<td>Size</td>
+		<td>Size (KB)</td>
 		<td>-</td>
-		<td>42.8 KB (496.0 KB)</td>
+		<td>42.8 / 496.0</td>
 	</tr>
 	<tr>
 		<td rowspan="2">SVG data URI</td>
@@ -60,8 +60,8 @@ Evtl. kein Limit für data-URIs bei SVG? Welcher Browser mit SVG-Support hat das
 		<td>1</td>
 	</tr>
 	<tr>
-		<td>Size</td>
-		<td>126.0 KB (1.9 MB)</td>
-		<td>49.4 KB (720.0 KB)</td>
+		<td>Size (KB)</td>
+		<td>126.0 / 1,913.0</td>
+		<td>49.4 / 720.0</td>
 	</tr>
 </table>
