@@ -65,3 +65,5 @@ Evtl. kein Limit für data-URIs bei SVG? Welcher Browser mit SVG-Support hat das
 		<td>49.4 / 720.0</td>
 	</tr>
 </table>
+
+[Scour - an SVG scrubber](http://www.codedread.com/scour)

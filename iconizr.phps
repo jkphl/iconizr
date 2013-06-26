@@ -57,6 +57,8 @@ class Iconizr {
 		'keep'		=> 0,
 		'svg'		=> self::DEFAULT_THRESHOLD_SVG,
 		'png'		=> self::DEFAULT_THRESHOLD_PNG,
+		'scour'		=> null,
+		'sassout'	=> null,
 	);
 	/**
 	 * Supporting binaries
@@ -69,6 +71,7 @@ class Iconizr {
 		'pngcrush'	=> false,
 		'pngquant'	=> false,
 		'optipng'	=> false,
+		'python'	=> false,
 	);
 	/**
 	 * SVG directories
@@ -82,6 +85,12 @@ class Iconizr {
 	 * @var array
 	 */
 	protected $_target = null;
+	/**
+	 * Target directory for Sass files
+	 *
+	 * @var array
+	 */
+	protected $_sassTarget = null;
 	/**
 	 * Temporary directory
 	 * 
@@ -188,6 +197,12 @@ class Iconizr {
 	 */
 	protected $_flags = array();
 	/**
+	 * Absolute path to scour script for cleaning the SVG files
+	 * 
+	 * @var string
+	 */
+	protected $_scour = null;
+	/**
 	 * PhantomJS script template
 	 * 
 	 * @var string
@@ -281,6 +296,8 @@ class Iconizr {
 				'dims|d'						=> 'Render icon dimensions in CSS and Sass files',
 				'keep|k'						=> 'Keep intermediate SVG and PNG files',
 				'verbose|v-i'					=> 'Output verbose progress information',
+				'scour=s'						=> 'Absolute path to scour script for cleaning SVG files (see http://www.codedread.com/scour)',
+				'sassout=s'						=> 'Optional separate output directory for Sass files',
 			));
 			$options							= $this->_defaultOptions;
 			foreach ($this->_options->getOptions() as $option) {
@@ -307,6 +324,9 @@ class Iconizr {
 			$this->_usage('Please provide a valid output directory');
 		}
 		
+		// Select Scour als SVG cleaner if possible
+		$this->_scour							= (strlen(trim($options['scour'])) && $this->_binaries['python'] && @is_readable($options['scour'])) ? trim($options['scour']) : null;
+		
 		// Set the CSS class prefix
 		$this->_prefix							= strlen(trim($options['prefix'])) ? trim($options['prefix']) : self::DEFAULT_PREFIX;
 
@@ -322,6 +342,20 @@ class Iconizr {
 		$this->_flags['quantize']				= !!$options['quantize'];
 		$this->_flags['dims']					= !!$options['dims'];
 		$this->_flags['keep']					= !!$options['keep'];
+		
+		// Determine Sass output directory (if any)
+		if ($this->_flags['sass']) {
+			$this->_sassTarget					= $this->_target;
+			if (array_key_exists('sassout', $options) && strlen($sassTarget = trim($options['sassout']))) {
+				$sassTarget						= strncmp($sassTarget, DIRECTORY_SEPARATOR, 1) ? $workingDirectory.DIRECTORY_SEPARATOR.$sassTarget : $sassTarget;
+				if (strncmp($workingDirectory, $sassTarget, strlen($workingDirectory))) {
+					$this->_usage('The sass output directory must be a subdirectory of the current working directory');
+				}
+				if (@is_dir($sassTarget) || (@mkdir($sassTarget, 0644, true) && chown($sassTarget, 0644))) {
+					$this->_sassTarget			= $sassTarget.DIRECTORY_SEPARATOR;
+				}
+			}
+		}
 		
 		// Prepare projected output elements
 		$outputElements							= array();
@@ -399,7 +433,7 @@ class Iconizr {
 				foreach ($this->_sass as $type => $modeContent) {
 					foreach ($modeContent as $mode => $content) {
 						if (is_array($content) && count($content)) {
-							file_put_contents($this->_target.$this->_flags['sass'].'-'.$type.'-'.$mode.'.scss', implode("\n", $content));
+							file_put_contents($this->_sassTarget.$this->_flags['sass'].'-'.$type.'-'.$mode.'.scss', implode("\n", $content));
 						}
 					}
 				}
@@ -452,7 +486,7 @@ class Iconizr {
 		$preview										.= '<style>body{padding:2em;margin:0}body,p,h1{font-family:Arial,Helvetica,sans-serif}ul{margin:0,padding:0}li{margin:2em 0}.icon{background-color:#eee}</style></head><body>';
 		$preview										.= '<form method="post"><h1>iconizr Icon Preview</h1><p>Please choose the icon rendering type: <select name="stylesheet"><?php foreach($stylesheets as $value => $label): ?><option value="<?php echo htmlspecialchars($value); ?>"<?php if($stylesheet == $value) echo \' selected="selected"\'; ?>><?php echo htmlspecialchars($label); ?></option><?php endforeach; ?></select><input type="submit" value="Set rendering type"/></p><ol>';
 		foreach ($this->_iconNames as $icon) {
-			$preview									.= '<li><div>'.$icon.'</div><div class="icon '.$icon.' '.$icon.'-dims"></div></li>';
+			$preview									.= '<li><div>'.$icon.'</div><div class="icon '.$icon.' '.$icon.'-dims"><!-- '.$icon.' --></div></li>';
 		}
 		$preview										.= '</ol></form></body></html>';
 		file_put_contents($this->_target.$this->_flags['css'].'-preview.php', $preview);
@@ -505,8 +539,10 @@ class Iconizr {
 	 */
 	protected function _processSVGIcons($directory, array $icons) {
 		$this->_log('=== Processing SVG icons ...');
-		if ($this->_binaries['svgo']) {
-			$this->_log('|-- Optimizing SVG icons ...');
+		if ($this->_scour) {
+			$this->_log('|-- Optimizing SVG icons using Scour ...');
+		} elseif ($this->_binaries['svgo']) {
+			$this->_log('|-- Optimizing SVG icons using SVGO ...');
 		}
 		
 		// Run through all icons
@@ -516,8 +552,27 @@ class Iconizr {
 			$targetIcon							= $this->_tmpDir.DIRECTORY_SEPARATOR.$icon;
 			$this->_tmpResources[]				= $targetIcon;
 				
-			// If the SVGO binary is available
-			if ($this->_binaries['svgo']) {
+			// If the Scour script is available
+			if ($this->_binaries['python'] && $this->_scour) {
+				$this->_log(sprintf('|   Optimizing SVG icon "%s"', basename($targetIcon)));
+				
+				// Create an optimized copy of the icon
+				if (!$this->_do($this->_binaries['python'], array(
+					array($this->_scour),
+					'--create-groups',
+					'--enable-comment-stripping',
+					'--remove-metadata',
+					'--indent=none',
+					'--renderer-workaround',
+					'-q',
+					'-i'						=> $directory.DIRECTORY_SEPARATOR.$icon,
+					'-o'						=> $targetIcon,
+				))) {
+					$this->_error(sprintf('Optimization of icon "%s" failed, exiting', basename($targetIcon)));
+				}
+			
+			// Else If the SVGO binary is available
+			} elseif ($this->_binaries['svgo']) {
 				$this->_log(sprintf('|   Optimizing SVG icon "%s"', basename($targetIcon)));
 		
 				// Create an optimized copy of the icon
@@ -800,7 +855,7 @@ class Iconizr {
 		$image	        						= imagecreatetruecolor($imageWidth, $imageHeight);
 		$transparent							= imagecolorallocatealpha($image, 0, 0, 0, 127);
 		$transparentIndex						= imagecolortransparent($image, $transparent);
-		imageFill($image, 0, 0, $transparent);
+		imagefill($image, 0, 0, $transparent);
 		imagealphablending($image, false);
 		imagesavealpha($image, true);
 		
@@ -838,7 +893,6 @@ class Iconizr {
 		
 		// Finally optimize the sprite itself
 		$this->_log('|-- Optimizing the PNG sprite ...');
-		chdir($this->_target);
 		$optimizedSprite											= $this->_optimizePNGImages(array('sprite' => $this->_target.$spritePath));
 		$optimizedSprite											= $this->_target.$this->_tmpName.DIRECTORY_SEPARATOR.$optimizedSprite[$this->_target.$spritePath];
 		if (($optimizedSprite != $this->_target.$spritePath) && (filesize($optimizedSprite) < filesize($this->_target.$spritePath))) {
