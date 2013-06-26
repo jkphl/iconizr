@@ -286,18 +286,18 @@ class Iconizr {
 		try {
 			$this->_options						= new \Zend\Console\Getopt(array(
 				'out|o=s'						=> 'Output directory',
-				'prefix|p=s'					=> 'CSS class prefix (default: '.self::DEFAULT_PREFIX.')',
-				'level|l=i'						=> 'PNG image optimization level: 0 (fast & rough) - 10 (slow & high quality), default: '.self::DEFAULT_LEVEL,
-				'svg=i'							=> 'Data URI byte threshold for SVG files, default: '.self::DEFAULT_THRESHOLD_SVG,
-				'png=i'							=> 'Data URI byte threshold for PNG files, default: '.self::DEFAULT_THRESHOLD_PNG,
+				'sassout=s'						=> 'Optional separate output directory for Sass files',
 				'css|c-s'						=> 'Render CSS files (optionally provide a CSS file prefix, default: iconizr)',
 				'sass|s-s'						=> 'Render Sass files (optionally provide a Sass file prefix, default: iconizr)',
+				'prefix|p=s'					=> 'CSS class prefix (default: '.self::DEFAULT_PREFIX.')',
+				'level|l=i'						=> 'PNG image optimization level: 0 (fast & rough) - 10 (slow & high quality), default: '.self::DEFAULT_LEVEL,
 				'quantize|q'					=> 'Quantize PNG images (reduce to 8-bit color depth)',
+				'svg=i'							=> 'Data URI byte threshold for SVG files, default: '.self::DEFAULT_THRESHOLD_SVG,
+				'png=i'							=> 'Data URI byte threshold for PNG files, default: '.self::DEFAULT_THRESHOLD_PNG,
 				'dims|d'						=> 'Render icon dimensions in CSS and Sass files',
 				'keep|k'						=> 'Keep intermediate SVG and PNG files',
 				'verbose|v-i'					=> 'Output verbose progress information',
 				'scour=s'						=> 'Absolute path to scour script for cleaning SVG files (see http://www.codedread.com/scour)',
-				'sassout=s'						=> 'Optional separate output directory for Sass files',
 			));
 			$options							= $this->_defaultOptions;
 			foreach ($this->_options->getOptions() as $option) {
