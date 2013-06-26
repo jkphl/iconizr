@@ -965,8 +965,8 @@ class Iconizr {
 			if ($this->_flags['dims']) {
 				list($iconWidth, $iconHeight)						= $this->_getIconDimensions($directory, $icon, $name);
 				$sass[$directory.DIRECTORY_SEPARATOR.$name.'-dims']	= ".$prefix-$name-dims {
-	width: ".$icon[3].'px;
-	height: '.$icon[4].'px;
+	width: ".$iconWidth.'px;
+	height: '.$iconHeight.'px;
 }';
 			}
 		}
