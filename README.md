@@ -92,7 +92,7 @@ Usage:
 		<td><code>-q</code></td>
 		<td><code>--quantize</code></td>
 		<td> </td>
-		<td>If given, iconizr will quantize PNG images (i.e. convert them to 8-bit color depth; please see the [requirements](#requirements) for this). The quantized images are only used if they are smaller in file size than their the originals (and this is not necessarily the case for all PNG files). Quantization may also impact the visual image quality, so please make sure to compare the result to the original images.</td>
+		<td>If given, iconizr will quantize PNG images (i.e. convert them to 8-bit color depth; please see the <a href="#requirements">requirements</a> for this). The quantized images are only used if they are smaller in file size than their the originals (and this is not necessarily the case for all PNG files). Quantization may also impact the visual image quality, so please make sure to compare the result to the original images.</td>
 	</tr>
 	<tr>
 		<td> </td>
@@ -128,7 +128,7 @@ Usage:
 		<td> </td>
 		<td><code>--scour</code></td>
 		<td>String</td>
-		<td>iconizr can use either [SVGO](https://github.com/svg/svgo) or [Scour](http://www.codedread.com/scour) for cleaning the original SVG files. As far as I can tell, Scour yields slightly better results (i.e. smaller SVG files) than SVGO. As Scour is rather a Python script than an executable, you need to provide the full script path via this option if you want to use it (also, of course, Python has to be available on the system; see [requirements](#requirements)).</td>
+		<td>iconizr can use either <a href="https://github.com/svg/svgo">SVGO</a> or <a href="http://www.codedread.com/scour">Scour</a> for cleaning the original SVG files. As far as I can tell, Scour yields slightly better results (i.e. smaller SVG files) than SVGO. As Scour is rather a Python script than an executable, you need to provide the full script path via this option if you want to use it (also, of course, Python has to be available on the system; see <a href="#requirements">requirements</a>).</td>
 	</tr>
 </table>
 
