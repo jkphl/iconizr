@@ -59,6 +59,7 @@ class Iconizr {
 		'png'		=> self::DEFAULT_THRESHOLD_PNG,
 		'scour'		=> null,
 		'sassout'	=> null,
+		'python'	=> null,
 	);
 	/**
 	 * Supporting binaries
@@ -298,6 +299,7 @@ class Iconizr {
 				'keep|k'						=> 'Keep intermediate SVG and PNG files',
 				'verbose|v-i'					=> 'Output verbose progress information',
 				'scour=s'						=> 'Absolute path to scour script for cleaning SVG files (see http://www.codedread.com/scour)',
+				'python=s'						=> 'Absolute path to Python 2 binary (only necessary if another Python version is the machine default)',
 			));
 			$options							= $this->_defaultOptions;
 			foreach ($this->_options->getOptions() as $option) {
@@ -324,8 +326,15 @@ class Iconizr {
 			$this->_usage('Please provide a valid output directory');
 		}
 		
+		// Verify the Python binary
+		if (strlen($options['python']) && @is_file($options['python']) && ($this->_pythonMajorVersion($options['python']) == 2)) {
+			$this->_binaries['python']			= $options['python'];
+		} elseif ($this->_binaries['python'] && ($this->_pythonMajorVersion($this->_binaries['python']) != 2)) {
+			$this->_binaries['python']			= null;
+		}
+		
 		// Select Scour als SVG cleaner if possible
-		$this->_scour							= (strlen(trim($options['scour'])) && $this->_binaries['python'] && @is_readable($options['scour'])) ? trim($options['scour']) : null;
+		$this->_scour							= (strlen(trim($options['scour'])) && @is_readable($options['scour'])) ? trim($options['scour']) : null;
 		
 		// Set the CSS class prefix
 		$this->_prefix							= strlen(trim($options['prefix'])) ? trim($options['prefix']) : self::DEFAULT_PREFIX;
@@ -539,10 +548,10 @@ class Iconizr {
 	 */
 	protected function _processSVGIcons($directory, array $icons) {
 		$this->_log('=== Processing SVG icons ...');
-		if ($this->_scour) {
+		if ($this->_scour && $this->_binaries['python']) {
 			$this->_log('|-- Optimizing SVG icons using Scour ...');
-		} elseif ($this->_binaries['svgo']) {
-			$this->_log('|-- Optimizing SVG icons using SVGO ...');
+		} elseif ($this->_binaries['Svgo']) {
+			$this->_log('|-- Optimizing SVG icons using SVGO '.($this->_scour ? '(No Scour due to missing Python 2 support) ' : '').'...');
 		}
 		
 		// Run through all icons
@@ -564,6 +573,7 @@ class Iconizr {
 					'--remove-metadata',
 					'--indent=none',
 					'--renderer-workaround',
+					'--strip-xml-prolog',
 					'-q',
 					'-i'						=> $directory.DIRECTORY_SEPARATOR.$icon,
 					'-o'						=> $targetIcon,
@@ -1155,6 +1165,25 @@ class Iconizr {
 			$filenames[$png]				.= $extension.'.png';
 		}
 		return $filenames;
+	}
+	
+	/**
+	 * Return the major version of a Python binary
+	 * 
+	 * @param string $python				Absolute Python binary path
+	 * @return int							Major Python version
+	 */
+	protected function _pythonMajorVersion($python) {
+		$pythonMajorVersion					= null;
+		$pythonHandle						= popen($python.' --version 2>&1', 'r');
+		if ($pythonHandle) {
+			$pythonVersionString			= fread($pythonHandle, 1024);
+			pclose($pythonHandle);
+			if (preg_match("%^Python\s+(\d+)(?:\.\d+)*$%i", $pythonVersionString, $pythonVersion)) {
+				$pythonMajorVersion			= intval($pythonVersion[1]);
+			}
+		}
+		return $pythonMajorVersion;
 	}
 	
 	/**
