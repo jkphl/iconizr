@@ -70,7 +70,6 @@ Usage:
 		<td>If this argument is given, several CSS files will be generated. By default, the filenames will all start with "iconizr" (e.g. "iconizr-svg-data.css"). If you provide a string value for this argument (e.g. "myproject"), this value will be used as the prefix for all generated CSS files (e.g. "myproject-svg-data.css").</td>
 	</tr>
 	<tr>
-	<tr>
 		<td><code>-s</code></td>
 		<td><code>--sass</code></td>
 		<td>String (optional)</td>
@@ -86,7 +85,7 @@ Usage:
 		<td><code>-l</code></td>
 		<td><code>--level</code></td>
 		<td>Integer</td>
-		<td>This is the optimization level for PNG files. It has to be between 0 and 10 (including both) and defaults to 3, with 0 meaning "fast & rough" and 10 meaning "slow & high quality". Setting this to a high value may result in a very long processing time.</td>
+		<td>This is the optimization level for PNG files. It has to lie between 0 and 11 (inclusive) and defaults to 4, with 0 meaning "no optimization", 1 meaning "fast & rough" and 11 meaning "slow & high quality". Setting this to a high value may result in a very long processing time.</td>
 	</tr>
 	<tr>
 		<td><code>-q</code></td>
@@ -98,19 +97,31 @@ Usage:
 		<td> </td>
 		<td><code>--svg</code></td>
 		<td>Integer</td>
-		<td>This is the maximum length a SVG data URI may have. If only one icon exceeds this threshold, all data URIs of this icon set will be changed to external SVG sprite references. Defaults to 1048576 (1MB).</td>
+		<td>This is the maximum length a SVG data URI may have. If only one icon exceeds this threshold, all data URIs of this icon set will be changed to external SVG sprite references. Defaults to 1048576 (1MB), minimum is 1024 (1kB).</td>
 	</tr>
 	<tr>
 		<td> </td>
 		<td><code>--png</code></td>
 		<td>Integer</td>
-		<td>This is the maximum length a PNG data URI may have. If only one icon exceeds this threshold, all data URIs of this icon set will be changed to external PNG sprite references. Defaults to 32768 (32KB = Internet Explorer 8 limit).</td>
+		<td>This is the maximum length a PNG data URI may have. If only one icon exceeds this threshold, all data URIs of this icon set will be changed to external PNG sprite references. Defaults to 32768 (32KB = Internet Explorer 8 limit), minimum is 1024 (1kB).</td>
 	</tr>
 	<tr>
 		<td><code>-d</code></td>
 		<td><code>--dims</code></td>
 		<td> </td>
 		<td>If given, a second CSS rule for each icon will be created, setting the dimensions of the icon (via the <code>width</code> and <code>height</code> properties).</td>
+	</tr>
+	<tr>
+		<td> </td>
+		<td><code>--width</code></td>
+		<td>Integer</td>
+		<td>Default width for icons (in pixel) in case the SVG file is missing a value. Must be between 1 and 1000 (including).</td>
+	</tr>
+	<tr>
+		<td> </td>
+		<td><code>--height</code></td>
+		<td>Integer</td>
+		<td>Default height for icons (in pixel) in case the SVG file is missing a value. Must be between 1 and 1000 (including).</td>
 	</tr>
 	<tr>
 		<td><code>-k</code></td>
@@ -201,22 +212,40 @@ Evtl. kein Limit für data-URIs bei SVG? Welcher Browser mit SVG-Support hat das
 
 Requirements
 ------------
-[Scour - an SVG scrubber](http://www.codedread.com/scour)
+For iconizr to run, you will need some programs installed on your machine. These are:
+
+*	[PHP](http://php.net) (kinda obvious)
+*	[PhantomJS](http://phantomjs.org) (for rendering PNG images of your SVG drawings)
+
+For SVG optimization you will need either of the following (or both):
+
+*	[SVGO](https://github.com/svg/svgo) (which needs [Node.js](http://nodejs.org) ...) 
+*	[Scour](http://www.codedread.com/scour) (which needs [Python 2](http://www.python.org) ...)
+
+For PNG optimization you should have as many of the following as possible:
+
+*	[Pngcrush](http://pmt.sourceforge.net/pngcrush)
+*	[pngquant](http://pngquant.org)
+*	[OptiPNG](http://optipng.sourceforge.net)
 
 
 Resources
 ---------
+There are some useful resources on data URIs in general:
 
 *	[Data URIs](https://developer.mozilla.org/en-US/docs/data_URIs)
 *	[Data URI support](http://caniuse.com/datauri)
-*	[Data URI limitation on iPhone](iPhone: 128kB http://blog.clawpaws.net/post/2007/07/16/Storing-iPhone-apps-locally-with-data-URLs#c1989348)
-*	[Data URI limitation checker](http://odl-nbg.de/test/datauri.php)
+*	[Data URI limitation to 128kB on iPhone / Safari 3.0](http://blog.clawpaws.net/post/2007/07/16/Storing-iPhone-apps-locally-with-data-URLs#c1989348)
+*	[Data URI limitation checker](http://odl-nbg.de/test/datauri.php) to test which data URI size is supported by your device
 
-SVG Support:
-http://caniuse.com/svg
+As soon as I'll find some time I will do some tests in our [Open Device Lab](http://odl-nbg.de) to see if there are any device specific data URI limitations. 
+
+Resources on SVG support:
+
+*	[Can I use SVG](http://caniuse.com/svg)
+
 
 Legal
 -----
-*iconizr* by Joschi Kuphal is licensed under a [Creative Commons Attribution 3.0 Unported
-License](http://creativecommons.org/licenses/by/3.0/).
+*iconizr* by [Joschi Kuphal](http://joschi.kuphal.net) is licensed under a [Creative Commons Attribution 3.0 Unported License](http://creativecommons.org/licenses/by/3.0/). Follow [@jkphl](http://twitter.com/jkphl) on Twitter to keep updated.
 
