@@ -141,6 +141,12 @@ Usage:
 		<td>String</td>
 		<td>iconizr can use either <a href="https://github.com/svg/svgo">SVGO</a> or <a href="http://www.codedread.com/scour">Scour</a> for cleaning the original SVG files. As far as I can tell, Scour yields slightly better results (i.e. smaller SVG files) than SVGO. As Scour is rather a Python script than an executable, you need to provide the full script path via this option if you want to use it (also, of course, Python has to be available on the system; see <a href="#requirements">requirements</a>).</td>
 	</tr>
+	<tr>
+		<td> </td>
+		<td><code>--python</code></td>
+		<td>String</td>
+		<td>When using <a href="http://www.codedread.com/scour">Scour</a> for cleaning the original SVG files, you need to have <a href="http://www.python.org" target="_blank">Python 2</a> handy, as Scour is based on this version and hasn't been updated for quite a while. If your default Python binary is not version 2, you need to specify the absolute path to an alternative version 2 binary with this parameter.</td>
+	</tr>
 </table>
 
 Examples
