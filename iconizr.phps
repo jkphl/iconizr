@@ -83,6 +83,12 @@ class Iconizr {
 	 */
 	protected $_dirs = array();
 	/**
+	 * List of unique output directory names
+	 * 
+	 * @var array
+	 */
+	protected $_uniqueDirs = array();
+	/**
 	 * Target directory
 	 * 
 	 * @var array
@@ -480,7 +486,7 @@ class Iconizr {
 				
 				// If there are SVG files to be converted
 				if (count($this->_dirs[$dir])) {
-					$outputElements[]			= $this->_target.$this->_uniqueName($dir);
+					$this->_target.$this->_uniqueName($dir);
 					
 				// Else: Drop the input directory again
 				} else {
@@ -488,6 +494,9 @@ class Iconizr {
 				}
 			}
 		}
+		
+		// Register the unique output directory names
+		$outputElements							= array_merge($outputElements, array_values($this->_uniqueDirs));
 		
 		// If at least one input directory is given
 		if (count($this->_dirs)) {
@@ -552,14 +561,14 @@ class Iconizr {
 	 * @return void
 	 */
 	protected function _createPreviewAndLoaderFragment(array $css) {
-		$this->_log('Creating stylesheet loader fragment', self::LOG_CREATE);
+		$this->_log('Creating the stylesheet loader fragment', self::LOG_CREATE);
 		$loader											= '<script>';
 		$loader											.= '/* iconizr | https://github.com/jkphl/iconizr | © 2013 Joschi Kuphal | CC BY 3.0 */';
 		$loader											.= file_get_contents(__DIR__.DIRECTORY_SEPARATOR.'iconizr.min.js');
 		$loader											.= '</script><noscript><link href="'.htmlspecialchars($css[self::PNG][self::SPRITE]).'" rel="stylesheet"></noscript>';
 		file_put_contents($this->_target.$this->_flags['css'].'-loader-fragment.html', sprintf($loader, htmlspecialchars($css[self::PNG][self::SPRITE]), htmlspecialchars($css[self::PNG][self::DATA]), htmlspecialchars($css[self::SVG][self::SPRITE]), htmlspecialchars($css[self::SVG][self::DATA])));
 		
-		$this->_log('Creating preview document', self::LOG_CREATE);
+		$this->_log('Creating the preview document', self::LOG_CREATE);
 		$stylesheets									= array(
 			''											=> 'Automatic detection',
 			basename($css[self::PNG][self::SPRITE])		=> 'PNG sprite',
@@ -590,7 +599,7 @@ class Iconizr {
 	 * @return void
 	 */
 	protected function _createIconStack($directory, array $icons) {
-		$this->_log(sprintf('Processing icon directory "%s"', $directory), self::LOG_INFO);
+		$this->_log(sprintf('Processing icon directory "%s"', substr($directory, strlen(posix_getcwd()) + 1)), self::LOG_INFO);
 		
 		// Create a temporary directory
 		$this->_tmpResources					= array();
@@ -651,7 +660,7 @@ class Iconizr {
 				
 			// If the Scour script is available
 			if ($this->_binaries['python'] && $this->_scour) {
-				$this->_log(sprintf('Optimizing SVG icon "%s"', basename($targetIcon)));
+				$this->_log(sprintf('[%s/%s] Optimizing SVG icon "%s"', $iconIndex + 1, count($icons), basename($targetIcon)));
 				
 				// Create an optimized copy of the icon
 				if (!$this->_do($this->_binaries['python'], array(
@@ -671,7 +680,7 @@ class Iconizr {
 			
 			// Else If the SVGO binary is available
 			} elseif ($this->_binaries['svgo']) {
-				$this->_log(sprintf('Optimizing SVG icon "%s"', basename($targetIcon)));
+				$this->_log(sprintf('[%s/%s] Optimizing SVG icon "%s"', $iconIndex + 1, count($icons), basename($targetIcon)));
 		
 				// Create an optimized copy of the icon
 				if (!$this->_do($this->_binaries['svgo'], array(
@@ -712,12 +721,12 @@ class Iconizr {
 		
 			// If CSS rules shall be generated
 			if ($this->_flags['css'] !== false) {
-				$this->_css[self::SVG][self::DATA]						= array_merge($this->_css[self::SVG][self::DATA], $this->_createDataURICssRules($directory, $this->_dataUris[$directory][self::SVG]));
+				$this->_css[self::SVG][self::DATA]						= array_merge($this->_css[self::SVG][self::DATA], $this->_createDataURICssRules($directory, $this->_dataUris[$directory][self::SVG], self::SVG));
 			}
 			
 			// If Sass rules shall be generated
 			if ($this->_flags['css'] !== false) {
-				$this->_sass[self::SVG][self::DATA]						= array_merge($this->_sass[self::SVG][self::DATA], $this->_createDataURISassRules($directory, $this->_dataUris[$directory][self::SVG]));
+				$this->_sass[self::SVG][self::DATA]						= array_merge($this->_sass[self::SVG][self::DATA], $this->_createDataURISassRules($directory, $this->_dataUris[$directory][self::SVG], self::SVG));
 			}
 		}
 
@@ -792,12 +801,12 @@ class Iconizr {
 				
 				// If CSS rules shall be generated
 				if ($this->_flags['css'] !== false) {
-					$this->_css[self::PNG][self::DATA]							= array_merge($this->_css[self::PNG][self::DATA], $this->_createDataURICssRules($directory, $this->_dataUris[$directory][self::PNG]));
+					$this->_css[self::PNG][self::DATA]							= array_merge($this->_css[self::PNG][self::DATA], $this->_createDataURICssRules($directory, $this->_dataUris[$directory][self::PNG], self::PNG));
 				}
 				
 				// If Sass rules shall be generated
 				if ($this->_flags['sass'] !== false) {
-					$this->_sass[self::PNG][self::DATA]							= array_merge($this->_sass[self::PNG][self::DATA], $this->_createDataURISassRules($directory, $this->_dataUris[$directory][self::PNG]));
+					$this->_sass[self::PNG][self::DATA]							= array_merge($this->_sass[self::PNG][self::DATA], $this->_createDataURISassRules($directory, $this->_dataUris[$directory][self::PNG], self::PNG));
 				}
 			}
 			
@@ -1056,10 +1065,11 @@ class Iconizr {
 	 * 
 	 * @param string $directory					Directory
 	 * @param array $dataURIs					Data URIs
+	 * @param string $type						Icon type
 	 * @return array							CSS rules
 	 */
-	protected function _createDataURICssRules($directory, array $dataURIs) {
-		$this->_log('Creating data URI CSS rules', self::LOG_CREATE);
+	protected function _createDataURICssRules($directory, array $dataURIs, $type) {
+		$this->_log('Creating '.strtoupper($type).' data URI CSS rules', self::LOG_CREATE);
 		$prefix														= strlen($this->_prefix) ? $this->_prefix : $this->_tmpName;
 		$css														= array('/* Icons from directory "'.$directory.'" */');
 		foreach ($dataURIs as $name => $icon) {
@@ -1078,10 +1088,11 @@ class Iconizr {
 	 *
 	 * @param string $directory					Directory
 	 * @param array $dataURIs					Data URIs
+	 * @param string $type						Icon type
 	 * @return array							CSS rules
 	 */
-	protected function _createDataURISassRules($directory, array $dataURIs) {
-		$this->_log('Creating data URI Sass rules', self::LOG_CREATE);
+	protected function _createDataURISassRules($directory, array $dataURIs, $type) {
+		$this->_log('Creating '.strtoupper($type).' data URI Sass rules', self::LOG_CREATE);
 		$prefix														= strlen($this->_prefix) ? $this->_prefix : $this->_tmpName;
 		$sass														= array(
 			'// Icons from directory "'.$directory.'"',
@@ -1225,7 +1236,7 @@ class Iconizr {
 			
 		// If pngcrush is available
 		if ($this->_binaries['pngcrush']) {
-			$this->_log('Optimizing using "pngcrush" ...');
+			$this->_logGroupStart('Optimizing using "pngcrush" ...');
 			$suffix							= '-pc';
 			$suffices[]						= 'pc';
 			$params							= array(
@@ -1236,16 +1247,19 @@ class Iconizr {
 			if ($this->_flags['verbose'] < 3) {
 				$params[]					= '-q';
 			}
-			$params[]						= $pngs;
-			$this->_do($this->_binaries['pngcrush'], $params);
-			
-			// pngcrush will never result in bigger files, so it seems safe to always take the results
+			foreach (array_values($pngs) as $pngIndex => $png) {
+				$pngParams					= $params;
+				$pngParams[]				= array($png);
+				$this->_log(sprintf('[%s/%s] Optimizing PNG icon "%s" with "pngcrush"', $pngIndex + 1, count($pngs), basename($png)));
+				$this->_do($this->_binaries['pngcrush'], $pngParams);
+			}
 			$pngs							= $this->_mapFileExtension($pngFilenames, $suffix);
+			$this->_logGroupEnd();
 		}
 			
 		// If pngquant is available
 		if ($this->_flags['quantize'] && $this->_binaries['pngquant']) {
-			$this->_log('Optimizing using "pngquant" ...');
+			$this->_logGroupStart('Optimizing using "pngquant" ...');
 			$suffix							.= '-pq';
 			$suffices[]						= 'pq';
 			$params							= array(
@@ -1257,8 +1271,12 @@ class Iconizr {
 			if ($this->_flags['verbose'] >= 3) {
 				$params[]					= '--verbose';
 			}
-			$params[]						= $pngs;
-			$this->_do($this->_binaries['pngquant'], $params);
+			foreach (array_values($pngs) as $pngIndex => $png) {
+				$pngParams					= $params;
+				$pngParams[]				= array($png);
+				$this->_log(sprintf('[%s/%s] Optimizing PNG icon "%s" with "pngquant"', $pngIndex + 1, count($pngs), basename($png)));
+				$this->_do($this->_binaries['pngquant'], $pngParams);
+			}
 			
 			// pngquant *can* produce bigger files, depending on the image contents, so the effects have to be checked for every file
 			$quantpngs						= $this->_mapFileExtension($pngFilenames, $suffix);
@@ -1271,11 +1289,12 @@ class Iconizr {
 					@unlink($directory.$quantpng);
 				}
 			}
+			$this->_logGroupEnd();
 		}
 		
 		// If optipng is available
 		if ($this->_binaries['optipng']) {
-			$this->_log('Optimizing using "optipng" ...');
+			$this->_logGroupStart('Optimizing using "optipng" ...');
 			$suffices[]						= 'op';
 			$optipngs						= array();
 			
@@ -1295,8 +1314,12 @@ class Iconizr {
 			if ($this->_flags['verbose'] < 3) {
 				$params[]					= '-quiet';
 			}
-			$params[]						= $optipngs;
-			$this->_do($this->_binaries['optipng'], $params);
+			foreach (array_values($optipngs) as $pngIndex => $png) {
+				$pngParams					= $params;
+				$pngParams[]				= array($png);
+				$this->_log(sprintf('[%s/%s] Optimizing PNG icon "%s" with "optipng"', $pngIndex + 1, count($pngs), basename($png)));
+				$this->_do($this->_binaries['optipng'], $pngParams);
+			}
 			
 			foreach ($optipngs as $png => $optipng) {
 				$directory					= dirname($png).DIRECTORY_SEPARATOR;
@@ -1307,6 +1330,7 @@ class Iconizr {
 					@unlink($directory.$optipng);
 				}
 			}
+			$this->_logGroupEnd();
 		}
 		
 		return $pngs;
@@ -1390,13 +1414,27 @@ class Iconizr {
 	 * @return string						Unique file / directory name
 	 */
 	protected function _uniqueName($path) {
-		$unique								= pathinfo($path, PATHINFO_FILENAME).'-';
-		if (function_exists('fileinode')) {
-			$unique							.= fileinode($path);
-		} else {
-			$unique							.= sha1($path);
+		if (!array_key_exists($path, $this->_uniqueDirs)) {
+			$dirname									= basename($path);
+			$mainDirnamePath							= array_search($dirname, $this->_uniqueDirs);
+			
+			// If a directory with the exact same name already exists
+			if ($mainDirnamePath !== false) {
+				$this->_uniqueDirs[$mainDirnamePath]	.= '~1';
+				$this->_uniqueDirs[$path]				= $dirname.'~2';
+				
+			// Else: find the next free Slot
+			} elseif (in_array($dirname.'~1', $this->_uniqueDirs)) {
+				$suffix									= 1;
+				while(in_array($dirname.'~'.++$suffix, $this->_uniqueDirs)) {}
+				$this->_uniqueDirs[$path]				= $dirname.'~'.$suffix;
+				
+			// Else 
+			} else {
+				$this->_uniqueDirs[$path]				= $dirname;
+			}
 		}
-		return $unique;
+		return $this->_uniqueDirs[$path];
 	}
 	
 	/**
@@ -1423,7 +1461,7 @@ class Iconizr {
 					
 				// If this message is part of a message group
 				} elseif (($this->_logGroup > 0) && ($type != self::LOG_GROUP)) {
-					$formatted				= '| ';					
+					$formatted				= '| '.str_repeat('  | ', $this->_logGroup - 2);					
 					
 				// Else
 				} else {
@@ -1436,7 +1474,7 @@ class Iconizr {
 						break;
 						
 					case self::LOG_GROUP:
-						$formatted			.= ($this->_logGroup > 1) ? '|--' : '===';
+						$formatted			.= ($this->_logGroup > 1) ? '|'.str_repeat('   |', $this->_logGroup - 2).'--' : '|==';
 						break;
 						
 					case self::LOG_CREATE:
@@ -1444,7 +1482,7 @@ class Iconizr {
 						break;
 						
 					default:
-						$formatted			.= ($this->_logGroup > 0) ? (($this->_logGroup > 1) ? '    ' : ' ') : '';
+						$formatted			.= ($this->_logGroup > 0) ? ' ' : '';
 						break;
 				}
 				

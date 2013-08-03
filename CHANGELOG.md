@@ -9,6 +9,8 @@
 3.	Added support for skipping PNG optimization
 4.	Documentation updates
 5.	Experimental SVG file sanitation (default width / height, ID namespacing) 
+6.	Optimized handling of identical input directory names
+7.	Optimized log messages
 
 
 Initial release (2013-6-22)

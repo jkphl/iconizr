@@ -4,7 +4,7 @@
 }
 .icon-weather-clear-night {
 	@extend %icon;
-	background-image: url('weather-16123200/weather-16123200.svg');
+	background-image: url('weather/weather.svg');
 	background-position: 0 0;
 }
 .icon-weather-clear-night-dims {
@@ -13,7 +13,7 @@
 }
 .icon-weather-clear {
 	@extend %icon;
-	background-image: url('weather-16123200/weather-16123200.svg');
+	background-image: url('weather/weather.svg');
 	background-position: 0 -48px;
 }
 .icon-weather-clear-dims {
@@ -22,7 +22,7 @@
 }
 .icon-weather-few-clouds-night {
 	@extend %icon;
-	background-image: url('weather-16123200/weather-16123200.svg');
+	background-image: url('weather/weather.svg');
 	background-position: 0 -96px;
 }
 .icon-weather-few-clouds-night-dims {
@@ -31,7 +31,7 @@
 }
 .icon-weather-few-clouds {
 	@extend %icon;
-	background-image: url('weather-16123200/weather-16123200.svg');
+	background-image: url('weather/weather.svg');
 	background-position: 0 -144px;
 }
 .icon-weather-few-clouds-dims {
@@ -40,7 +40,7 @@
 }
 .icon-weather-overcast {
 	@extend %icon;
-	background-image: url('weather-16123200/weather-16123200.svg');
+	background-image: url('weather/weather.svg');
 	background-position: 0 -192px;
 }
 .icon-weather-overcast-dims {
@@ -49,7 +49,7 @@
 }
 .icon-weather-severe-alert {
 	@extend %icon;
-	background-image: url('weather-16123200/weather-16123200.svg');
+	background-image: url('weather/weather.svg');
 	background-position: 0 -240px;
 }
 .icon-weather-severe-alert-dims {
@@ -58,7 +58,7 @@
 }
 .icon-weather-showers-scattered {
 	@extend %icon;
-	background-image: url('weather-16123200/weather-16123200.svg');
+	background-image: url('weather/weather.svg');
 	background-position: 0 -288px;
 }
 .icon-weather-showers-scattered-dims {
@@ -67,7 +67,7 @@
 }
 .icon-weather-showers {
 	@extend %icon;
-	background-image: url('weather-16123200/weather-16123200.svg');
+	background-image: url('weather/weather.svg');
 	background-position: 0 -336px;
 }
 .icon-weather-showers-dims {
@@ -76,7 +76,7 @@
 }
 .icon-weather-snow {
 	@extend %icon;
-	background-image: url('weather-16123200/weather-16123200.svg');
+	background-image: url('weather/weather.svg');
 	background-position: 0 -384px;
 }
 .icon-weather-snow-dims {
@@ -85,7 +85,7 @@
 }
 .icon-weather-storm {
 	@extend %icon;
-	background-image: url('weather-16123200/weather-16123200.svg');
+	background-image: url('weather/weather.svg');
 	background-position: 0 -432px;
 }
 .icon-weather-storm-dims {
