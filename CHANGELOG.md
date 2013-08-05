@@ -1,3 +1,6 @@
+Beta 2 (2013-08-05)
+---------------------------
+
 #### Bugs
 
 1.	Python 2 verification for proper [Scour](http://www.codedread.com/scour) support (#2)
