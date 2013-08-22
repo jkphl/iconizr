@@ -1,0 +1,21 @@
+/* Icons from directory "weather" */
+.icon-weather-clear-night{background-image:url('weather/weather-clear-night.svg');background-repeat:no-repeat}
+.icon-weather-clear-night-dims{width:48px;height:48px}
+.icon-weather-clear{background-image:url('weather/weather-clear.svg');background-repeat:no-repeat}
+.icon-weather-clear-dims{width:48px;height:48px}
+.icon-weather-few-clouds-night{background-image:url('weather/weather-few-clouds-night.svg');background-repeat:no-repeat}
+.icon-weather-few-clouds-night-dims{width:48px;height:48px}
+.icon-weather-few-clouds{background-image:url('weather/weather-few-clouds.svg');background-repeat:no-repeat}
+.icon-weather-few-clouds-dims{width:48px;height:48px}
+.icon-weather-overcast{background-image:url('weather/weather-overcast.svg');background-repeat:no-repeat}
+.icon-weather-overcast-dims{width:48px;height:48px}
+.icon-weather-severe-alert{background-image:url('weather/weather-severe-alert.svg');background-repeat:no-repeat}
+.icon-weather-severe-alert-dims{width:48px;height:48px}
+.icon-weather-showers-scattered{background-image:url('weather/weather-showers-scattered.svg');background-repeat:no-repeat}
+.icon-weather-showers-scattered-dims{width:48px;height:48px}
+.icon-weather-showers{background-image:url('weather/weather-showers.svg');background-repeat:no-repeat}
+.icon-weather-showers-dims{width:48px;height:48px}
+.icon-weather-snow{background-image:url('weather/weather-snow.svg');background-repeat:no-repeat}
+.icon-weather-snow-dims{width:48px;height:48px}
+.icon-weather-storm{background-image:url('weather/weather-storm.svg');background-repeat:no-repeat}
+.icon-weather-storm-dims{width:48px;height:48px}

@@ -1,23 +1,6 @@
 #!/usr/bin/php
 <?php
 
-/************************************************************************************************
- * VERARBEITUNGSABLAUF
- * 
- * 1.) Optimieren und Zwischenspeichern aller SVG-Dateien
- * 2.) Konvertieren in data-URIs (ASCII)
- * 2.a) Wenn eine data-URI > 32768 Zeichen: SVG-Sprite-Modus, Konstruieren des SVG-Sprite
- * 3.) Rendern des SVG-CSS mit data-URIs oder Referenz auf den SVG-Sprite
- * 
- * 4.) Rendern aller SVG -> PNG (phantomJS)
- * 5.) Crushen aller PNG-Bilder in Kopien
- * 6.) Konvertieren in data-URIs (Base64)
- * 6.a) Wenn eine data-URI > 32768 Zeichen: PNG-Sprite-Modus, Konstruieren des PNG-Sprites aus
- * 		den unkomprimierten Basis-PNGs, anschließendes crushen
- *  3.) Rendern des PNG-CSS mit data-URIs oder Referenz auf den PNG-Sprite
- * 
- ***********************************************************************************************/
-
 namespace Jkphl;
 
 // Require Zend classes for argument validation
@@ -52,6 +35,7 @@ class Iconizr {
 		'css'		=> 0,
 		'sass'		=> 0,
 		'quantize'	=> 0,
+		'root'		=> 0,
 		'dims'		=> 0,
 		'verbose'	=> 0,
 		'keep'		=> 0,
@@ -76,6 +60,12 @@ class Iconizr {
 		'optipng'	=> false,
 		'python'	=> false,
 	);
+	/**
+	 * Current working directory
+	 * 
+	 * @var string
+	 */
+	protected $_cwd = null;
 	/**
 	 * SVG directories
 	 * 
@@ -125,10 +115,12 @@ class Iconizr {
 	 */
 	protected $_css = array(
 		self::SVG			=> array(
+			self::SINGLE	=> array(),
 			self::DATA		=> array(),
 			self::SPRITE	=> array(),
 		),
 		self::PNG			=> array(
+			self::SINGLE	=> array(),
 			self::DATA		=> array(),
 			self::SPRITE	=> array(),
 		),
@@ -140,10 +132,12 @@ class Iconizr {
 	 */
 	protected $_sass = array(
 		self::SVG			=> array(
+			self::SINGLE	=> array(),
 			self::DATA		=> array(),
 			self::SPRITE	=> array(),
 		),
 		self::PNG			=> array(
+			self::SINGLE	=> array(),
 			self::DATA		=> array(),
 			self::SPRITE	=> array(),
 		),
@@ -254,6 +248,12 @@ class Iconizr {
 	 */
 	const PNG = 'png';
 	/**
+	 * Single image mode
+	 * 
+	 * @var string
+	 */
+	const SINGLE = 'single';
+	/**
 	 * Data URI mode
 	 * 
 	 * @var string
@@ -354,6 +354,7 @@ class Iconizr {
 	 * @return void
 	 */
 	public function __construct() {
+		$this->_cwd								= getcwd();
 		
 		// Find the binary helpers supported by the system
 		foreach ($this->_binaries as $name => $available) {
@@ -373,6 +374,7 @@ class Iconizr {
 				'prefix|p=s'					=> 'CSS class prefix (default: '.self::DEFAULT_PREFIX.')',
 				'level|l=i'						=> 'PNG image optimization level: 0 (no optimization), 1 (fast & rough) - 11 (slow & high quality), default: '.self::DEFAULT_LEVEL,
 				'quantize|q'					=> 'Quantize PNG images (reduce to 8-bit color depth)',
+				'root|r'						=> 'Root-relative CSS directory',
 				'width=i'						=> 'Default icon width (if SVG is missing a width value)',
 				'height=i'						=> 'Default icon height (if SVG is missing a height value)',
 				'svg=i'							=> 'Data URI byte threshold for SVG files, default: '.self::DEFAULT_THRESHOLD_SVG,
@@ -395,7 +397,7 @@ class Iconizr {
 		
 		// Verify the output directory
 		if (array_key_exists('out', $options) && strlen($target = trim($options['out']))) {
-			$workingDirectory					= rtrim(getcwd(), DIRECTORY_SEPARATOR);
+			$workingDirectory					= rtrim($this->_cwd, DIRECTORY_SEPARATOR);
 			$target								= strncmp($target, DIRECTORY_SEPARATOR, 1) ? $workingDirectory.DIRECTORY_SEPARATOR.$target : $target;
 			if (strncmp($workingDirectory, $target, strlen($workingDirectory))) {
 				$this->_usage('The output directory must be a subdirectory of the current working directory');
@@ -436,6 +438,7 @@ class Iconizr {
 		$this->_flags['sass']					= (is_string($options['sass']) && strlen(trim($options['sass']))) ? trim($options['sass']) : (intval($options['sass']) ? self::DEFAULT_FILE : false);
 		$this->_flags['verbose']				= intval($options['verbose']);
 		$this->_flags['quantize']				= !!$options['quantize'];
+		$this->_flags['root']					= !!$options['root'] ? '/' : '';
 		$this->_flags['dims']					= !!$options['dims'];
 		$this->_flags['keep']					= !!$options['keep'];
 		
@@ -561,34 +564,64 @@ class Iconizr {
 	 * @return void
 	 */
 	protected function _createPreviewAndLoaderFragment(array $css) {
-		$this->_log('Creating the stylesheet loader fragment', self::LOG_CREATE);
-		$loader											= '<script>';
-		$loader											.= '/* iconizr | https://github.com/jkphl/iconizr | © 2013 Joschi Kuphal | CC BY 3.0 */';
-		$loader											.= file_get_contents(__DIR__.DIRECTORY_SEPARATOR.'iconizr.min.js');
-		$loader											.= '</script><noscript><link href="'.htmlspecialchars($css[self::PNG][self::SPRITE]).'" rel="stylesheet"></noscript>';
-		file_put_contents($this->_target.$this->_flags['css'].'-loader-fragment.html', sprintf($loader, htmlspecialchars($css[self::PNG][self::SPRITE]), htmlspecialchars($css[self::PNG][self::DATA]), htmlspecialchars($css[self::SVG][self::SPRITE]), htmlspecialchars($css[self::SVG][self::DATA])));
 		
-		$this->_log('Creating the preview document', self::LOG_CREATE);
-		$stylesheets									= array(
-			''											=> 'Automatic detection',
-			basename($css[self::PNG][self::SPRITE])		=> 'PNG sprite',
-			basename($css[self::PNG][self::DATA])		=> 'PNG data URIs',
-			basename($css[self::SVG][self::SPRITE])		=> 'SVG sprite',
-			basename($css[self::SVG][self::DATA])		=> 'SVG data URIs',
-				
-		);
-		$preview										= '<?php $stylesheets = '.var_export($stylesheets, true).'; $stylesheet = empty($_POST["stylesheet"]) ? "" : $_POST["stylesheet"]; ?>';
-		$preview										.= '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>iconizr Icon Preview</title>';
-		$preview										.= '<?php if ($stylesheet == ""): ?>';
-		$preview										.= sprintf($loader, htmlspecialchars(basename($css[self::PNG][self::SPRITE])), htmlspecialchars(basename($css[self::PNG][self::DATA])), htmlspecialchars(basename($css[self::SVG][self::SPRITE])), htmlspecialchars(basename($css[self::SVG][self::DATA])));
-		$preview										.= '<?php else: ?><link href="<?php echo htmlspecialchars($stylesheet); ?>" rel="stylesheet" type="text/css"/><?php endif; ?>';
-		$preview										.= '<style>body{padding:2em;margin:0}body,p,h1{font-family:Arial,Helvetica,sans-serif}ul{margin:0,padding:0}li{margin:2em 0}.icon{background-color:#eee}</style></head><body>';
-		$preview										.= '<form method="post"><h1>iconizr Icon Preview</h1><p>Please choose the icon rendering type: <select name="stylesheet"><?php foreach($stylesheets as $value => $label): ?><option value="<?php echo htmlspecialchars($value); ?>"<?php if($stylesheet == $value) echo \' selected="selected"\'; ?>><?php echo htmlspecialchars($label); ?></option><?php endforeach; ?></select><input type="submit" value="Set rendering type"/></p><ol>';
-		foreach ($this->_iconNames as $icon) {
-			$preview									.= '<li><div>'.$icon.'</div><div class="icon '.$icon.' '.$icon.'-dims"><!-- '.$icon.' --></div></li>';
+		// Prepare the loader script fragment 
+		$this->_log('Creating the stylesheet loader fragment', self::LOG_CREATE);
+		$loader														= '<script type="text/javascript">';
+		$loader														.= '/* iconizr | https://github.com/jkphl/iconizr | © '.date('Y').' Joschi Kuphal | CC BY 3.0 */';
+		$loader														.= file_get_contents(__DIR__.DIRECTORY_SEPARATOR.'iconizr.min.js');
+		$loader														.= '</script>';
+		$loader														.= '<noscript><link href="'.htmlspecialchars($css[self::PNG][self::SPRITE]).'" rel="stylesheet"></noscript>';
+		file_put_contents($this->_target.$this->_flags['css'].'-loader-fragment.html', sprintf($loader, $this->_flags['root'].htmlspecialchars($css[self::PNG][self::SPRITE]), $this->_flags['root'].htmlspecialchars($css[self::PNG][self::DATA]), $this->_flags['root'].htmlspecialchars($css[self::SVG][self::SPRITE]), $this->_flags['root'].htmlspecialchars($css[self::SVG][self::DATA])));
+
+		// Create the preview documents
+		$this->_log('Creating the icon kit preview documents', self::LOG_CREATE);
+		$stylesheets												= array('' => 'Automatic detection');
+		if ($this->_flags['keep']) {
+			$stylesheets[basename($css[self::PNG][self::SINGLE])]	= 'PNG single images'; 
 		}
-		$preview										.= '</ol></form></body></html>';
-		file_put_contents($this->_target.$this->_flags['css'].'-preview.php', $preview);
+		$stylesheets[basename($css[self::PNG][self::SPRITE])]		= 'PNG sprite';
+		$stylesheets[basename($css[self::PNG][self::DATA])]			= 'PNG data URIs';
+		if ($this->_flags['keep']) {
+			$stylesheets[basename($css[self::SVG][self::SINGLE])]	= 'SVG single images';
+		}
+		$stylesheets[basename($css[self::SVG][self::SPRITE])]		= 'SVG sprite';
+		$stylesheets[basename($css[self::SVG][self::DATA])]			= 'SVG data URIs';
+
+		// Prepare the preview document
+		$preview													= array(
+			'primer'												=> '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>Icon kit preview | iconizr.com</title>',
+			'css'													=> '',
+			'styles'												=> '<style type="text/css">@CHARSET "UTF-8";body{padding:0;margin:0;color:#666;background:#fafafa;font-family:Arial, Helvetica, sans-serif;font-size:1em;line-height:1.4}header{display:block;padding:3em 3em 2em 3em;background-color:#fff}header p{margin:2em 0 0 0}#logo{font-size:xx-large;font-size:3rem;padding:0;margin:0;height:53px;background:url(data:image/png;base64,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) center left no-repeat;white-space:nowrap;overflow:hidden;text-indent:100%}nav{font-size:.7em;display:block;width:100%;margin:0 0 2em 0}nav a{display:inline-block;text-decoration:none;margin-left:2em;color:#0f7595;white-space:nowrap}nav a:hover{text-decoration:underline}nav a.current{font-weight:bold;text-decoration:underline;color:#666}section{border-top:1px solid #eee;padding:2em 3em 0 3em}ul{margin:0;padding:0}li{display:inline;display:inline-block;background-color:#fff;position:relative;margin:0 2em 2em 0;vertical-align:top;border:1px solid #ccc;padding:1em 1em 3em 1em;cursor:default}.icon-box{margin:0;width:144px;height:144px;position:relative;background:#ccc url(data:image/gif;base64,R0lGODlhDAAMAIAAAMzMzP///yH/C1hNUCBEYXRhWE1QPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS4wLWMwNjEgNjQuMTQwOTQ5LCAyMDEwLzEyLzA3LTEwOjU3OjAxICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1LjEgV2luZG93cyIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozQjk4OTI0MUY5NTIxMUUyQkJDMEI5NEFEM0Y1QTYwQyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozQjk4OTI0MkY5NTIxMUUyQkJDMEI5NEFEM0Y1QTYwQyI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjNCOTg5MjNGRjk1MjExRTJCQkMwQjk0QUQzRjVBNjBDIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjNCOTg5MjQwRjk1MjExRTJCQkMwQjk0QUQzRjVBNjBDIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+Af/+/fz7+vn49/b19PPy8fDv7u3s6+rp6Ofm5eTj4uHg397d3Nva2djX1tXU09LR0M/OzczLysnIx8bFxMPCwcC/vr28u7q5uLe2tbSzsrGwr66trKuqqainpqWko6KhoJ+enZybmpmYl5aVlJOSkZCPjo2Mi4qJiIeGhYSDgoGAf359fHt6eXh3dnV0c3JxcG9ubWxramloZ2ZlZGNiYWBfXl1cW1pZWFdWVVRTUlFQT05NTEtKSUhHRkVEQ0JBQD8+PTw7Ojk4NzY1NDMyMTAvLi0sKyopKCcmJSQjIiEgHx4dHBsaGRgXFhUUExIREA8ODQwLCgkIBwYFBAMCAQAAIfkEAAAAAAAsAAAAAAwADAAAAhaEH6mHmmzcgzJAUG/NVGrfOZ8YLlABADs=) top left repeat;border:1px solid #ccc;display:table-cell;vertical-align:middle;text-align:center}.icon{display:inline;display:inline-block}h2{margin:0;padding:0;font-size:1em;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:absolute;left:1em;right:1em;bottom:1em}footer{display:block;margin:0;padding:0 3em 3em 3em}footer p{margin:0;font-size:.7em}footer a{color:#0f7595;margin-left:0}</style>',
+			'prenav'												=> '</head><body><header><h1 id="logo">iconizr</h1><p>These are the <strong>'.count($this->_iconNames).' icons</strong> contained in your icon kit, along with their CSS class names.</p></header><section><nav>Icon type:',
+			'typelinks'												=> '',
+			'postnav'												=> '</nav><ul>',
+			'icons'													=> '',
+			'end'													=> '</ul></section><footer><p>Generated at '.gmdate('D, d M Y H:i:s', time()).' GMT by <a href="http://iconizr.com" target="_blank">iconizr</a>.</p></footer></body></html>',
+		);
+		
+		// Render the icon previews
+		foreach ($this->_iconNames as $icon) {
+			$preview['icons']										.= '<li title="'.$icon.'"><div class="icon-box"><div class="icon '.$icon.' '.$icon.'-dims"><!-- '.$icon.' --></div></div><h2>'.$icon.'</h2></li>';
+		}
+		
+		// Run through all available icon types / style sheets
+		foreach ($stylesheets as $stylesheet => $label) {
+			$iconTypePreview										= $preview;
+			$iconTypePreview['css']									= strlen($stylesheet) ? '<link href="'.htmlspecialchars($stylesheet).'" rel="stylesheet" type="text/css"/>' : sprintf($loader, htmlspecialchars(basename($css[self::PNG][self::SPRITE])), htmlspecialchars(basename($css[self::PNG][self::DATA])), htmlspecialchars(basename($css[self::SVG][self::SPRITE])), htmlspecialchars(basename($css[self::SVG][self::DATA])));
+
+			// Run through all available icon types and create the navigation elements
+			foreach ($stylesheets as $linkStylesheet => $linkLabel) {
+				$linkIconPreviewFilename							= strlen($linkStylesheet) ? pathinfo($linkStylesheet, PATHINFO_FILENAME).'-preview.html' : $this->_flags['css'].'-preview.html';
+				$currentIconType									= $stylesheet == $linkStylesheet;
+				$iconTypePreview['typelinks']						.= '<a href="'.$linkIconPreviewFilename.'"'.($currentIconType ? ' class="current"' : '').'>'.htmlspecialchars($linkLabel).'</a>';
+			}
+			
+			$previewFilename										= strlen($stylesheet) ? pathinfo($stylesheet, PATHINFO_FILENAME).'-preview.html' : $this->_flags['css'].'-preview.html';
+			
+			// Write the preview file to disk
+			file_put_contents($this->_target.$previewFilename, implode('', $iconTypePreview));
+		}
 	}
 	
 	/**
@@ -599,7 +632,7 @@ class Iconizr {
 	 * @return void
 	 */
 	protected function _createIconStack($directory, array $icons) {
-		$this->_log(sprintf('Processing icon directory "%s"', substr($directory, strlen(posix_getcwd()) + 1)), self::LOG_INFO);
+		$this->_log(sprintf('Processing icon directory "%s"', substr($directory, strlen($this->_cwd) + 1)), self::LOG_INFO);
 		
 		// Create a temporary directory
 		$this->_tmpResources					= array();
@@ -716,6 +749,20 @@ class Iconizr {
 			$this->_logGroupEnd();
 		}
 		
+		// If single image icons should be created / kept
+		if ($this->_flags['keep']) {
+			
+			// If CSS rules shall be generated
+			if ($this->_flags['css'] !== false) {
+				$this->_css[self::SVG][self::SINGLE]					= array_merge($this->_css[self::SVG][self::SINGLE], $this->_createSingleImageCssRules($directory, $this->_useSprite[$directory][self::SVG], self::SVG));
+			}
+				
+			// If Sass rules shall be generated
+			if ($this->_flags['sass'] !== false) {
+				$this->_sass[self::SVG][self::SINGLE]					= array_merge($this->_sass[self::SVG][self::SINGLE], $this->_createSingleImageSassRules($directory, $this->_useSprite[$directory][self::SVG], self::SVG));
+			}
+		}
+		
 		// If data URIs can be used
 		if ($dataUris = is_array($this->_dataUris[$directory][self::SVG])) {
 		
@@ -725,7 +772,7 @@ class Iconizr {
 			}
 			
 			// If Sass rules shall be generated
-			if ($this->_flags['css'] !== false) {
+			if ($this->_flags['sass'] !== false) {
 				$this->_sass[self::SVG][self::DATA]						= array_merge($this->_sass[self::SVG][self::DATA], $this->_createDataURISassRules($directory, $this->_dataUris[$directory][self::SVG], self::SVG));
 			}
 		}
@@ -793,6 +840,20 @@ class Iconizr {
 			} else {
 				foreach ($this->_useSprite[$directory][self::PNG] as $icon => $png) {
 					$this->_registerDataURI($directory, self::PNG, $icon, $png);
+				}
+			}
+			
+			// If single image icons should be created / kept
+			if ($this->_flags['keep']) {
+					
+				// If CSS rules shall be generated
+				if ($this->_flags['css'] !== false) {
+					$this->_css[self::PNG][self::SINGLE]						= array_merge($this->_css[self::PNG][self::SINGLE], $this->_createSingleImageCssRules($directory, $this->_useSprite[$directory][self::PNG], self::PNG));
+				}
+			
+				// If Sass rules shall be generated
+				if ($this->_flags['sass'] !== false) {
+					$this->_sass[self::PNG][self::SINGLE]						= array_merge($this->_sass[self::PNG][self::SINGLE], $this->_createSingleImageSassRules($directory, $this->_useSprite[$directory][self::PNG], self::PNG));
 				}
 			}
 			
@@ -870,9 +931,9 @@ class Iconizr {
 		$spriteName								= $this->_tmpName.'.svg';
 		$spritePath								= $this->_tmpName.DIRECTORY_SEPARATOR.$spriteName;
 		$prefix									= strlen($this->_prefix) ? $this->_prefix : $this->_tmpName;
-		$css									= array('/* Icons from directory "'.$directory.'" */');
+		$css									= array('/* Icons from directory "'.substr($directory, strlen($this->_cwd) + 1).'" */');
 		$sass									= array(
-			'// Icons from directory "'.$directory.'"',
+			'// Icons from directory "'.substr($directory, strlen($this->_cwd) + 1).'"',
 			"%$prefix {
 	background-repeat: no-repeat
 }",
@@ -930,7 +991,7 @@ class Iconizr {
 		}
 		
 		// Finalize the SVG sprite
-		$spriteSVG->insertBefore(new \DOMComment('Icons from directory "'.$directory.'"'), $spriteSVG->documentElement);
+		$spriteSVG->insertBefore(new \DOMComment('Icons from directory "'.substr($directory, strlen($this->_cwd) + 1).'"'), $spriteSVG->documentElement);
 		$spriteSVG->documentElement->setAttribute('width', $viewboxWidth);
 		$spriteSVG->documentElement->setAttribute('height', $viewboxHeight);
 		$spriteSVG->documentElement->setAttribute('viewBox', '0 0 '.$viewboxWidth.' '.$viewboxHeight);
@@ -970,9 +1031,9 @@ class Iconizr {
 		$spriteName								= $this->_tmpName.'.png';
 		$spritePath								= $this->_tmpName.DIRECTORY_SEPARATOR.$spriteName;
 		$prefix									= strlen($this->_prefix) ? $this->_prefix : $this->_tmpName;
-		$css									= array('/* Icons from directory "'.$directory.'" */');
+		$css									= array('/* Icons from directory "'.substr($directory, strlen($this->_cwd) + 1).'" */');
 		$sass									= array(
-			'// Icons from directory "'.$directory.'"',
+			'// Icons from directory "'.substr($directory, strlen($this->_cwd) + 1).'"',
 			"%$prefix {
 	background-repeat: no-repeat
 }",
@@ -1061,6 +1122,28 @@ class Iconizr {
 	}
 	
 	/**
+	 * Create CSS rules using single images
+	 *
+	 * @param string $directory					Directory
+	 * @param array $iconImages					Icon images
+	 * @param string $type						Icon type
+	 * @return array							CSS rules
+	 */
+	protected function _createSingleImageCssRules($directory, array $iconImages, $type) {
+		$this->_log('Creating '.strtoupper($type).' single image CSS rules', self::LOG_CREATE);
+		$prefix														= strlen($this->_prefix) ? $this->_prefix : $this->_tmpName;
+		$css														= array('/* Icons from directory "'.substr($directory, strlen($this->_cwd) + 1).'" */');
+		foreach ($iconImages as $name => $icon) {
+			$css[$directory.DIRECTORY_SEPARATOR.$name]				= ".$prefix-$name{background-image:url('".substr($icon, strlen($this->_target))."');background-repeat:no-repeat}";
+			if ($this->_flags['dims']) {
+				list($iconWidth, $iconHeight)						= $this->_getIconDimensions($directory, $icon, $name);
+				$css[$directory.DIRECTORY_SEPARATOR.$name.'-dims']	= ".$prefix-$name-dims{width:".$iconWidth.'px;height:'.$iconHeight.'px}';
+			}
+		}
+		return $css;
+	}
+	
+	/**
 	 * Create CSS rules using data URIs
 	 * 
 	 * @param string $directory					Directory
@@ -1071,7 +1154,7 @@ class Iconizr {
 	protected function _createDataURICssRules($directory, array $dataURIs, $type) {
 		$this->_log('Creating '.strtoupper($type).' data URI CSS rules', self::LOG_CREATE);
 		$prefix														= strlen($this->_prefix) ? $this->_prefix : $this->_tmpName;
-		$css														= array('/* Icons from directory "'.$directory.'" */');
+		$css														= array('/* Icons from directory "'.substr($directory, strlen($this->_cwd) + 1).'" */');
 		foreach ($dataURIs as $name => $icon) {
 			$css[$directory.DIRECTORY_SEPARATOR.$name]				= ".$prefix-$name{background-image:url('$icon');background-repeat:no-repeat}";
 			if ($this->_flags['dims']) {
@@ -1081,21 +1164,53 @@ class Iconizr {
 		}
 		return $css;
 	}
-	
 
+	/**
+	 * Create Sass rules using single images
+	 *
+	 * @param string $directory					Directory
+	 * @param array $iconImages					Icon images
+	 * @param string $type						Icon type
+	 * @return array							Sass rules
+	 */
+	protected function _createSingleImageSassRules($directory, array $iconImages, $type) {
+		$this->_log('Creating '.strtoupper($type).' single image Sass rules', self::LOG_CREATE);
+		$prefix														= strlen($this->_prefix) ? $this->_prefix : $this->_tmpName;
+		$sass														= array(
+			'// Icons from directory "'.substr($directory, strlen($this->_cwd) + 1).'"',
+			"%$prefix {
+	background-repeat: no-repeat
+}",
+		);
+		foreach ($iconImages as $name => $icon) {
+			$sass[$directory.DIRECTORY_SEPARATOR.$name]				= ".$prefix-$name {
+	@extend %$prefix;
+	background-image: url('".substr($icon, strlen($this->_target))."');
+}";
+			if ($this->_flags['dims']) {
+				list($iconWidth, $iconHeight)						= $this->_getIconDimensions($directory, $icon, $name);
+				$sass[$directory.DIRECTORY_SEPARATOR.$name.'-dims']	= ".$prefix-$name-dims {
+	width: ".$iconWidth.'px;
+	height: '.$iconHeight.'px;
+}';
+		}
+		}
+		return $sass;
+	}
+	
 	/**
 	 * Create Sass rules using data URIs
 	 *
 	 * @param string $directory					Directory
 	 * @param array $dataURIs					Data URIs
 	 * @param string $type						Icon type
-	 * @return array							CSS rules
+	 * @return array							Sass rules
 	 */
 	protected function _createDataURISassRules($directory, array $dataURIs, $type) {
 		$this->_log('Creating '.strtoupper($type).' data URI Sass rules', self::LOG_CREATE);
 		$prefix														= strlen($this->_prefix) ? $this->_prefix : $this->_tmpName;
 		$sass														= array(
-			'// Icons from directory "'.$directory.'"',
+			'// Icons from directory "'.substr($directory, strlen($this->_cwd) + 1).'"',
 			"%$prefix {
 	background-repeat: no-repeat
 }",

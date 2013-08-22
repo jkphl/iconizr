@@ -1,3 +1,16 @@
+Beta 3 (2013-08-22)
+---------------------------
+
+#### Bugs
+
+1.	Data URI Sass rules were created although not configured 
+
+#### Enhancements / Features
+
+1.	Added support for single image icon stylesheets
+1.	Added support for root-relative CSS directory
+
+
 Beta 2 (2013-08-05)
 ---------------------------
 

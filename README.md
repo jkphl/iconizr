@@ -2,13 +2,15 @@ iconizr
 =======
 is an – at present: proof-of-concept – **command line tool** that helps you prepare your vector based SVG icons for use with the widest possible range of devices. It takes a [folder of SVG files](example/weather) and processes them to a bunch of files including
 
-*	possibly cleaned versions of the original **SVG icons**,
+*	cleaned versions of the original **SVG icons** (optional),
 *	a single compact **[SVG icon sprite](example/css/weather-16123200/weather-16123200.svg)**,
-*	single **PNG icons**,
+*	single **PNG icons** (optional),
 *	a combined **[PNG icon sprite](example/css/weather-16123200/weather-16123200.png)**,
 *	several **CSS files** with different formats inlcuding
+	*	[SVG single image icons](example/css/weather-svg-single.css) (optional),
 	*	[SVG data URIs](example/css/weather-svg-data.css),
 	*	[SVG sprite references](example/css/weather-svg-sprite.css),
+	*	[PNG single image icons](example/css/weather-png-single.css) (optional),
 	*	[PNG data URIs](example/css/weather-png-data.css) and
 	*	[PNG sprite references](example/css/weather-png-sprite.css),
 *	**[Sass variants](example/sass)** of these CSS files for easy inclusion into your Sass project,
@@ -94,6 +96,12 @@ Usage:
 		<td>If given, iconizr will quantize PNG images (i.e. convert them to 8-bit color depth; please see the <a href="#requirements">requirements</a> for this). The quantized images are only used if they are smaller in file size than their the originals (and this is not necessarily the case for all PNG files). Quantization may also impact the visual image quality, so please make sure to compare the result to the original images.</td>
 	</tr>
 	<tr>
+		<td><code>-r</code></td>
+		<td><code>--root</code></td>
+		<td> </td>
+		<td>If given, iconizr will use the CSS output directory as root-relative path in the stylesheet loader HTML fragment (i.e. <code>/path/to/icons.css</code> instead of <code>path/to/icons.css</code>).</td>
+	</tr>
+	<tr>
 		<td> </td>
 		<td><code>--svg</code></td>
 		<td>Integer</td>
@@ -127,7 +135,7 @@ Usage:
 		<td><code>-k</code></td>
 		<td><code>--keep</code></td>
 		<td> </td>
-		<td>During the compilation of the SVG and PNG sprites, iconizr also creates intermediate SVG and PNG versions of each single icon. Usually, these intermediate files are deleted at the end of the compilation process. If you want to keep these files for some reason, just add this argument.</td>
+		<td>During the compilation of the SVG and PNG sprites, iconizr also creates intermediate SVG and PNG versions of each single icon. Usually, these intermediate files are deleted at the end of the compilation process. If you want to keep these files for some reason, just add this argument.<br/>In this case, also an additional set of stylesheets will be created (both CSS and/or Sass), which uses these single image icons (carrying the suffix <code>-single.html</code>). However, it is not recommended to use these stylesheets for production systems, and you should always prefer the CSS sprite or data URI variants for performance reasons. The single image icon stylesheets will also be ignored by the stylesheet loader JavaScript, but at least you will be able to select them explicitly using the icon kit preview documents.</td>
 	</tr>
 	<tr>
 		<td><code>-v</code></td>
