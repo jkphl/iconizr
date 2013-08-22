@@ -571,7 +571,7 @@ class Iconizr {
 		$loader														.= '/* iconizr | https://github.com/jkphl/iconizr | © '.date('Y').' Joschi Kuphal | CC BY 3.0 */';
 		$loader														.= file_get_contents(__DIR__.DIRECTORY_SEPARATOR.'iconizr.min.js');
 		$loader														.= '</script>';
-		$loader														.= '<noscript><link href="'.htmlspecialchars($css[self::PNG][self::SPRITE]).'" rel="stylesheet"></noscript>';
+		$loader														.= '<noscript><link href="'.$this->_flags['root'].htmlspecialchars($css[self::PNG][self::SPRITE]).'" rel="stylesheet"></noscript>';
 		file_put_contents($this->_target.$this->_flags['css'].'-loader-fragment.html', sprintf($loader, $this->_flags['root'].htmlspecialchars($css[self::PNG][self::SPRITE]), $this->_flags['root'].htmlspecialchars($css[self::PNG][self::DATA]), $this->_flags['root'].htmlspecialchars($css[self::SVG][self::SPRITE]), $this->_flags['root'].htmlspecialchars($css[self::SVG][self::DATA])));
 
 		// Create the preview documents
