@@ -1,3 +1,15 @@
+Beta 4 (2013-08-26)
+---------------------------
+
+#### Bugs
+
+1.	Corrected some minor inline documentation errors
+
+#### Enhancements / Features
+
+1.	Dropped --root argument in favor of --embed argument (support for explicit HTML embed path prefix)
+
+
 Beta 3 (2013-08-22)
 ---------------------------
 
@@ -8,7 +20,7 @@ Beta 3 (2013-08-22)
 #### Enhancements / Features
 
 1.	Added support for single image icon stylesheets
-1.	Added support for root-relative CSS directory
+2.	Added support for root-relative CSS directory
 
 
 Beta 2 (2013-08-05)

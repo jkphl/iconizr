@@ -6,16 +6,16 @@ is an – at present: proof-of-concept – **command line tool** that helps you 
 *	a single compact **[SVG icon sprite](example/css/weather-16123200/weather-16123200.svg)**,
 *	single **PNG icons** (optional),
 *	a combined **[PNG icon sprite](example/css/weather-16123200/weather-16123200.png)**,
-*	several **CSS files** with different formats inlcuding
+*	several **CSS files** with different formats, including
 	*	[SVG single image icons](example/css/weather-svg-single.css) (optional),
 	*	[SVG data URIs](example/css/weather-svg-data.css),
 	*	[SVG sprite references](example/css/weather-svg-sprite.css),
 	*	[PNG single image icons](example/css/weather-png-single.css) (optional),
 	*	[PNG data URIs](example/css/weather-png-data.css) and
 	*	[PNG sprite references](example/css/weather-png-sprite.css),
-*	**[Sass variants](example/sass)** of these CSS files for easy inclusion into your Sass project,
-*	an **[HTML fragment](example/css/weather-loader-fragment.html)** including some JavaScript for asynchronously loading the most appropriate icon variant
-*	and finally an **[HTML/PHP preview page](example/css/weather-preview.php)** for testing the different icon variants. 
+*	**[Sass variants](example/sass)** (scss dialect) of these CSS files for easy inclusion into your Sass project,
+*	a **[HTML fragment](example/css/weather-loader-fragment.html)** including some JavaScript for asynchronously loading the most appropriate icon variant
+*	and finally a couple of **[HTML preview documents](example/css/weather-preview.html)** (depending on the options you specified) for previewing and testing the different icon variants. 
 
 To leverage *iconizr* to the greatest extent possible, some additional tools have to be installed on the system independently ([see below](#requirements)).  
 
@@ -96,10 +96,10 @@ Usage:
 		<td>If given, iconizr will quantize PNG images (i.e. convert them to 8-bit color depth; please see the <a href="#requirements">requirements</a> for this). The quantized images are only used if they are smaller in file size than their the originals (and this is not necessarily the case for all PNG files). Quantization may also impact the visual image quality, so please make sure to compare the result to the original images.</td>
 	</tr>
 	<tr>
-		<td><code>-r</code></td>
-		<td><code>--root</code></td>
+		<td><code>-e</code></td>
+		<td><code>--embed</code></td>
 		<td> </td>
-		<td>If given, iconizr will use the CSS output directory as root-relative path in the stylesheet loader HTML fragment (i.e. <code>/path/to/icons.css</code> instead of <code>path/to/icons.css</code>).</td>
+		<td>If given, iconizr will use this value as a prefix to the CSS directory path used to embed the stylesheets into your HTML documents (inside the <a href="example/css/weather-loader-fragment.html">JavaScript loader fragment</a>). By default, the <code>--out</code> directory will be used as a root-relative path (i.e. giving <code>path/to/css</code> as <code>--out</code> directory will result in e.g. <code>/path/to/css/weather-svg-sprite.css</code> as CSS embed path). You may specify a period <code>.</code> here to make the embed path relative to your HTML document (i.e. <code>./path/to/css/weather-svg-sprite.css</code>), or use any other arbitrary relative path (e.g. <code>../resources</code> for the embed path <code>../resources/path/to/css/weather-svg-sprite.css</code>).</td>
 	</tr>
 	<tr>
 		<td> </td>

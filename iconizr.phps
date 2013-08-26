@@ -35,7 +35,6 @@ class Iconizr {
 		'css'		=> 0,
 		'sass'		=> 0,
 		'quantize'	=> 0,
-		'root'		=> 0,
 		'dims'		=> 0,
 		'verbose'	=> 0,
 		'keep'		=> 0,
@@ -79,17 +78,23 @@ class Iconizr {
 	 */
 	protected $_uniqueDirs = array();
 	/**
-	 * Target directory
+	 * Target directory for CSS files
 	 * 
-	 * @var array
+	 * @var string
 	 */
 	protected $_target = null;
 	/**
 	 * Target directory for Sass files
 	 *
-	 * @var array
+	 * @var string
 	 */
 	protected $_sassTarget = null;
+	/**
+	 * Prefix to the CSS directory path for embedding in HTML documents
+	 * 
+	 * @var string
+	 */
+	protected $_embed = null;
 	/**
 	 * Temporary directory
 	 * 
@@ -374,7 +379,7 @@ class Iconizr {
 				'prefix|p=s'					=> 'CSS class prefix (default: '.self::DEFAULT_PREFIX.')',
 				'level|l=i'						=> 'PNG image optimization level: 0 (no optimization), 1 (fast & rough) - 11 (slow & high quality), default: '.self::DEFAULT_LEVEL,
 				'quantize|q'					=> 'Quantize PNG images (reduce to 8-bit color depth)',
-				'root|r'						=> 'Root-relative CSS directory',
+				'embed|e=s'						=> 'Prefix to the CSS directory path for embedding the stylesheets into your HTML documents (default: no prefix, use output directory as root-relative path)',
 				'width=i'						=> 'Default icon width (if SVG is missing a width value)',
 				'height=i'						=> 'Default icon height (if SVG is missing a height value)',
 				'svg=i'							=> 'Data URI byte threshold for SVG files, default: '.self::DEFAULT_THRESHOLD_SVG,
@@ -398,7 +403,7 @@ class Iconizr {
 		// Verify the output directory
 		if (array_key_exists('out', $options) && strlen($target = trim($options['out']))) {
 			$workingDirectory					= rtrim($this->_cwd, DIRECTORY_SEPARATOR);
-			$target								= strncmp($target, DIRECTORY_SEPARATOR, 1) ? $workingDirectory.DIRECTORY_SEPARATOR.$target : $target;
+			$target								= rtrim(strncmp($target, DIRECTORY_SEPARATOR, 1) ? $workingDirectory.DIRECTORY_SEPARATOR.$target : $target, DIRECTORY_SEPARATOR);
 			if (strncmp($workingDirectory, $target, strlen($workingDirectory))) {
 				$this->_usage('The output directory must be a subdirectory of the current working directory');
 			}
@@ -409,6 +414,9 @@ class Iconizr {
 		if ($this->_target === null) {
 			$this->_usage('Please provide a valid output directory');
 		}
+		
+		// Determine the HTML embed CSS directory path
+		$this->_embed							= rtrim((array_key_exists('embed', $options) && strlen($options['embed'])) ? $options['embed'] : '', DIRECTORY_SEPARATOR).'/';
 		
 		// Verify the Python binary
 		if (strlen($options['python']) && @is_file($options['python']) && ($this->_pythonMajorVersion($options['python']) == 2)) {
@@ -438,7 +446,6 @@ class Iconizr {
 		$this->_flags['sass']					= (is_string($options['sass']) && strlen(trim($options['sass']))) ? trim($options['sass']) : (intval($options['sass']) ? self::DEFAULT_FILE : false);
 		$this->_flags['verbose']				= intval($options['verbose']);
 		$this->_flags['quantize']				= !!$options['quantize'];
-		$this->_flags['root']					= !!$options['root'] ? '/' : '';
 		$this->_flags['dims']					= !!$options['dims'];
 		$this->_flags['keep']					= !!$options['keep'];
 		
@@ -446,7 +453,7 @@ class Iconizr {
 		if ($this->_flags['sass']) {
 			$this->_sassTarget					= $this->_target;
 			if (array_key_exists('sassout', $options) && strlen($sassTarget = trim($options['sassout']))) {
-				$sassTarget						= strncmp($sassTarget, DIRECTORY_SEPARATOR, 1) ? $workingDirectory.DIRECTORY_SEPARATOR.$sassTarget : $sassTarget;
+				$sassTarget						= rtrim(strncmp($sassTarget, DIRECTORY_SEPARATOR, 1) ? $workingDirectory.DIRECTORY_SEPARATOR.$sassTarget : $sassTarget, DIRECTORY_SEPARATOR);
 				if (strncmp($workingDirectory, $sassTarget, strlen($workingDirectory))) {
 					$this->_usage('The sass output directory must be a subdirectory of the current working directory');
 				}
@@ -571,8 +578,8 @@ class Iconizr {
 		$loader														.= '/* iconizr | https://github.com/jkphl/iconizr | © '.date('Y').' Joschi Kuphal | CC BY 3.0 */';
 		$loader														.= file_get_contents(__DIR__.DIRECTORY_SEPARATOR.'iconizr.min.js');
 		$loader														.= '</script>';
-		$loader														.= '<noscript><link href="'.$this->_flags['root'].htmlspecialchars($css[self::PNG][self::SPRITE]).'" rel="stylesheet"></noscript>';
-		file_put_contents($this->_target.$this->_flags['css'].'-loader-fragment.html', sprintf($loader, $this->_flags['root'].htmlspecialchars($css[self::PNG][self::SPRITE]), $this->_flags['root'].htmlspecialchars($css[self::PNG][self::DATA]), $this->_flags['root'].htmlspecialchars($css[self::SVG][self::SPRITE]), $this->_flags['root'].htmlspecialchars($css[self::SVG][self::DATA])));
+		$loader														.= '<noscript><link href="'.$this->_embed.htmlspecialchars($css[self::PNG][self::SPRITE]).'" rel="stylesheet" type="text/css" media="all"></noscript>';
+		file_put_contents($this->_target.$this->_flags['css'].'-loader-fragment.html', sprintf($loader, $this->_embed.htmlspecialchars($css[self::PNG][self::SPRITE]), $this->_embed.htmlspecialchars($css[self::PNG][self::DATA]), $this->_embed.htmlspecialchars($css[self::SVG][self::SPRITE]), $this->_embed.htmlspecialchars($css[self::SVG][self::DATA])));
 
 		// Create the preview documents
 		$this->_log('Creating the icon kit preview documents', self::LOG_CREATE);
@@ -608,7 +615,7 @@ class Iconizr {
 		// Run through all available icon types / style sheets
 		foreach ($stylesheets as $stylesheet => $label) {
 			$iconTypePreview										= $preview;
-			$iconTypePreview['css']									= strlen($stylesheet) ? '<link href="'.htmlspecialchars($stylesheet).'" rel="stylesheet" type="text/css"/>' : sprintf($loader, htmlspecialchars(basename($css[self::PNG][self::SPRITE])), htmlspecialchars(basename($css[self::PNG][self::DATA])), htmlspecialchars(basename($css[self::SVG][self::SPRITE])), htmlspecialchars(basename($css[self::SVG][self::DATA])));
+			$iconTypePreview['css']									= strlen($stylesheet) ? '<link href="'.htmlspecialchars($stylesheet).'" rel="stylesheet" type="text/css" media="all"/>' : sprintf($loader, htmlspecialchars(basename($css[self::PNG][self::SPRITE])), htmlspecialchars(basename($css[self::PNG][self::DATA])), htmlspecialchars(basename($css[self::SVG][self::SPRITE])), htmlspecialchars(basename($css[self::SVG][self::DATA])));
 
 			// Run through all available icon types and create the navigation elements
 			foreach ($stylesheets as $linkStylesheet => $linkLabel) {
