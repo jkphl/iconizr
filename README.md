@@ -1,5 +1,8 @@
 iconizr
 =======
+
+![iconizr](http://iconizr.com/iconizr.png)
+
 is an – at present: proof-of-concept – **command line tool** that helps you prepare your vector based SVG icons for use with the widest possible range of devices. It takes a [folder of SVG files](example/weather) and processes them to a bunch of files including
 
 *	cleaned versions of the original **SVG icons** (optional),
@@ -21,6 +24,7 @@ To leverage *iconizr* to the greatest extent possible, some additional tools hav
 
 *iconizr* is written in (namespaced) **PHP** and meant to be used on the (Linux) command line (i.e. with the PHP CLI SAPI). To be honest, there was only one reason making me go for PHP: It is what I know best. Im sure there are quite some other fancy modern languages and techniques one could use for achieving the same, but I guess I'm just not smart enough for those. Having said this, I'd welcome anyone contributing a port of *iconizr*.
 
+
 Getting started
 ---------------
 
@@ -38,6 +42,7 @@ or using the symlink mentioned above:
 	iconizr --css --out css source/svg
 
 This will take all the SVG files found in `/path/to/website/docroot/source/svg` and render the resulting CSS files and sprites to the directory `/path/to/website/docroot/css` (and below). For the sake of simplicity, Sass files have been omitted in this example.
+
 
 Documentation
 -------------
@@ -123,13 +128,31 @@ Usage:
 		<td> </td>
 		<td><code>--width</code></td>
 		<td>Integer</td>
-		<td>Default width for icons (in pixel) in case the SVG file is missing a value. Must be between 1 and 1000 (including).</td>
+		<td>Default width for icons (in pixels) in case the SVG file is missing a value. Must be between 1 and the maximum width (including).</td>
 	</tr>
 	<tr>
 		<td> </td>
 		<td><code>--height</code></td>
 		<td>Integer</td>
-		<td>Default height for icons (in pixel) in case the SVG file is missing a value. Must be between 1 and 1000 (including).</td>
+		<td>Default height for icons (in pixels) in case the SVG file is missing a value. Must be between 1 and the maximum height (including).</td>
+	</tr>
+	<tr>
+		<td> </td>
+		<td><code>--maxwidth</code></td>
+		<td>Integer</td>
+		<td>Maximum width for icons (in pixels). Defaults to 1000.</td>
+	</tr>
+	<tr>
+		<td> </td>
+		<td><code>--maxheight</code></td>
+		<td>Integer</td>
+		<td>Maximum height for icons (in pixels). Defaults to 1000.</td>
+	</tr>
+	<tr>
+		<td> </td>
+		<td><code>--pseudo</code></td>
+		<td>String</td>
+		<td>You may bind an icon to a particular CSS pseudo class (like e.g. <code>:hover</code>, <code>:active</code>, <code>:target</code>). To do so, just append the desired pseudo class to the icon name, separated by a tilde <code>~</code>. For instance, an icon named <code>foo-bar~hover.svg</code> will result in a CSS class <code>icon-foo-bar:hover</code>. If you need to use another delimiter than a tilde <code>~</code>, just use this parameter to provide your custom string.</td>
 	</tr>
 	<tr>
 		<td><code>-k</code></td>
@@ -157,8 +180,36 @@ Usage:
 	</tr>
 </table>
 
-Examples
---------
+
+CSS pseudo classes
+------------------
+As of Beta 5 *iconizr* supports CSS pseudo classes (like e.g. **hover** or **active** states) for individual icons. To bind an icon to a specific pseudo class, just append it as a suffix to the icon file name, separated by the string specified with the <code>--pseudo</code> parameter (defaults to a tilde <code>~</code>). For example, two icon files named
+
+		foo-bar.svg
+		foo-bar~hover.svg
+		
+would result in the CSS rules
+
+		icon-foo-bar { ... }
+		icon-foo-bar:hover { ... }
+		
+This way you can easily achieve a *normal* and a *hover* state for an icon. In general, any conceivable pseudo class can be generated like this, as long as the involved characters are allowed in file names on your system. In fact, iconizr isn't aware of what is a real CSS pseudo class and what isn't, it's just dumb delimiter-to-colon substitution ... These could be some reasonable examples:
+
+		hover
+		active
+		target
+		first-child
+		last-child
+		nth-child()
+		...
+		
+The storm icon included in this package is an example for an icon with hover state:
+
+![Normal storm icon](example/css/weather/weather-storm.png)
+![Thunderstorm icon](example/css/weather/weather-storm~hover.png)
+
+In the [HTML preview documents](example/css/weather-preview.html) both icons will be shown, but also if you hover over the regular one, you will see it's hover state as well.
+
 
 Comparison to grunticon
 -----------------------
@@ -263,3 +314,4 @@ Legal
 -----
 *iconizr* by [Joschi Kuphal](http://joschi.kuphal.net) is licensed under a [Creative Commons Attribution 3.0 Unported License](http://creativecommons.org/licenses/by/3.0/). Follow [@jkphl](http://twitter.com/jkphl) on Twitter to keep updated.
 
+The contained example SVG icons are part of the [Tango Icon Library](http://tango.freedesktop.org/Tango_Icon_Library) and belong to the Public Domain.

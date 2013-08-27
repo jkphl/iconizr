@@ -2,7 +2,7 @@
 %icon {
 	background-repeat: no-repeat
 }
-.icon-weather-clear-night {
+.icon-weather-clear-night-dims {
 	@extend %icon;
 	background-image: url('weather/weather.svg');
 	background-position: 0 0;
@@ -11,7 +11,7 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-clear {
+.icon-weather-clear-dims {
 	@extend %icon;
 	background-image: url('weather/weather.svg');
 	background-position: 0 -48px;
@@ -20,7 +20,7 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-few-clouds-night {
+.icon-weather-few-clouds-night-dims {
 	@extend %icon;
 	background-image: url('weather/weather.svg');
 	background-position: 0 -96px;
@@ -29,7 +29,7 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-few-clouds {
+.icon-weather-few-clouds-dims {
 	@extend %icon;
 	background-image: url('weather/weather.svg');
 	background-position: 0 -144px;
@@ -38,7 +38,7 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-overcast {
+.icon-weather-overcast-dims {
 	@extend %icon;
 	background-image: url('weather/weather.svg');
 	background-position: 0 -192px;
@@ -47,7 +47,7 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-severe-alert {
+.icon-weather-severe-alert-dims {
 	@extend %icon;
 	background-image: url('weather/weather.svg');
 	background-position: 0 -240px;
@@ -56,7 +56,7 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-showers-scattered {
+.icon-weather-showers-scattered-dims {
 	@extend %icon;
 	background-image: url('weather/weather.svg');
 	background-position: 0 -288px;
@@ -65,7 +65,7 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-showers {
+.icon-weather-showers-dims {
 	@extend %icon;
 	background-image: url('weather/weather.svg');
 	background-position: 0 -336px;
@@ -74,7 +74,7 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-snow {
+.icon-weather-snow-dims {
 	@extend %icon;
 	background-image: url('weather/weather.svg');
 	background-position: 0 -384px;
@@ -83,7 +83,7 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-storm {
+.icon-weather-storm-dims {
 	@extend %icon;
 	background-image: url('weather/weather.svg');
 	background-position: 0 -432px;
@@ -91,4 +91,14 @@
 .icon-weather-storm-dims {
 	width: 48px;
 	height: 48px;
+}
+.icon-weather-storm-dims:hover,.icon-weather-storm\:hover-dims {
+	@extend %icon;
+	background-image: url('weather/weather.svg');
+	background-position: 0 -480px;
+}
+.icon-weather-storm-dims:hover,
+.icon-weather-storm\:hover-dims {
+	width: 44px;
+	height: 49px;
 }

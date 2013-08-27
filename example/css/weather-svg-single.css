@@ -19,3 +19,5 @@
 .icon-weather-snow-dims{width:48px;height:48px}
 .icon-weather-storm{background-image:url('weather/weather-storm.svg');background-repeat:no-repeat}
 .icon-weather-storm-dims{width:48px;height:48px}
+.icon-weather-storm:hover,.icon-weather-storm\:hover{background-image:url('weather/weather-storm~hover.svg');background-repeat:no-repeat}
+.icon-weather-storm-dims:hover,.icon-weather-storm\:hover-dims{width:44px;height:49px}

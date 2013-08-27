@@ -1,3 +1,12 @@
+Beta 5 (2013-08-27)
+---------------------------
+
+#### Enhancements / Features
+
+1.	Added support for maximum icon dimensions (#3)
+2.	Added support for icon pseudo classes (#4)
+
+
 Beta 4 (2013-08-26)
 ---------------------------
 
