@@ -1,3 +1,11 @@
+Beta 6 (2013-08-29)
+---------------------------
+
+#### Bugs
+
+1.	Improved robustness & tolerance for failed / erroneous SVG optimizations (#5)
+
+
 Beta 5 (2013-08-27)
 ---------------------------
 

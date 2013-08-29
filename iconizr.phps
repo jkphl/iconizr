@@ -437,7 +437,7 @@ class Iconizr {
 			if (strncmp($workingDirectory, $target, strlen($workingDirectory))) {
 				$this->_usage('The output directory must be a subdirectory of the current working directory');
 			}
-			if (@is_dir($target) || (@mkdir($target, 0644, true) && chown($target, 0644))) {
+			if (@is_dir($target) || @mkdir($target, 0777, true)) {
 				$this->_target					= $target.DIRECTORY_SEPARATOR;
 			}
 		}
@@ -490,7 +490,7 @@ class Iconizr {
 				if (strncmp($workingDirectory, $sassTarget, strlen($workingDirectory))) {
 					$this->_usage('The sass output directory must be a subdirectory of the current working directory');
 				}
-				if (@is_dir($sassTarget) || (@mkdir($sassTarget, 0644, true) && chown($sassTarget, 0644))) {
+				if (@is_dir($sassTarget) || @mkdir($sassTarget, 0777, true)) {
 					$this->_sassTarget			= $sassTarget.DIRECTORY_SEPARATOR;
 				}
 			}
@@ -728,17 +728,36 @@ class Iconizr {
 		
 		// Run through all icons
 		foreach ($icons as $iconIndex => $icon) {
+			
+			/**
+			 * Resolve all named entities inside the SVG document
+			 * 
+			 * @see https://github.com/jkphl/iconizr/issues/5#issuecomment-23448050
+			 */
+			try {
+				$iconSVG						= new \DOMDocument();
+				$iconSVG->load($directory.DIRECTORY_SEPARATOR.$icon, LIBXML_NOENT);
+				$iconSVG->save($directory.DIRECTORY_SEPARATOR.$icon);
+				unset($iconSVG);
+				
+			// If an error had occured
+			} catch (\Exception $e) {
+				$this->_error(sprintf('The icon "%s" seems to be no valid XML document, skipping ...: %s', basename($targetIcon), $e->getMessage()), false, 0);
+				continue;
+			}
+			
 			$iconName							= pathinfo($icon, PATHINFO_FILENAME);
 			$this->_iconNames[]					= (strlen($this->_prefix) ? $this->_prefix : $this->_tmpName).'-'.$iconName;
+			$this->_tmpResources[]				=
 			$targetIcon							= $this->_tmpDir.DIRECTORY_SEPARATOR.$icon;
-			$this->_tmpResources[]				= $targetIcon;
+			$iconOptimized						= false;
 				
 			// If the Scour script is available
-			if ($this->_binaries['python'] && $this->_scour) {
-				$this->_log(sprintf('[%s/%s] Optimizing SVG icon "%s"', $iconIndex + 1, count($icons), basename($targetIcon)));
+			if ($optimizeSVG && $this->_scour && $this->_binaries['python']) {
+				$this->_log(sprintf('[%s/%s] Optimizing SVG icon "%s" using Scour', $iconIndex + 1, count($icons), basename($targetIcon)));
 				
-				// Create an optimized copy of the icon
-				if (!$this->_do($this->_binaries['python'], array(
+				// If an optimized copy of the icon can be created ...
+				if ($this->_do($this->_binaries['python'], array(
 					array($this->_scour),
 					'--create-groups',
 					'--enable-comment-stripping',
@@ -750,23 +769,33 @@ class Iconizr {
 					'-i'						=> $directory.DIRECTORY_SEPARATOR.$icon,
 					'-o'						=> $targetIcon,
 				))) {
-					$this->_error(sprintf('Optimization of icon "%s" failed, exiting', basename($targetIcon)));
+					$iconOptimized				= true;
+					
+				// Else: Error and fallback to SVGO (if available)
+				} else {
+					$this->_error(sprintf('Optimization of icon "%s" with Scour failed, skipping ...', basename($targetIcon)), false, 0);
 				}
+			}
 			
-			// Else If the SVGO binary is available
-			} elseif ($this->_binaries['svgo']) {
-				$this->_log(sprintf('[%s/%s] Optimizing SVG icon "%s"', $iconIndex + 1, count($icons), basename($targetIcon)));
+			// If the SVGO binary is available
+			if ($optimizeSVG && !$iconOptimized && $this->_binaries['svgo']) {
+				$this->_log(sprintf('[%s/%s] Optimizing SVG icon "%s" using SVGO', $iconIndex + 1, count($icons), basename($targetIcon)));
 		
-				// Create an optimized copy of the icon
-				if (!$this->_do($this->_binaries['svgo'], array(
+				// If an optimized copy of the icon can be created ...
+				if ($this->_do($this->_binaries['svgo'], array(
 					'-i'						=> $directory.DIRECTORY_SEPARATOR.$icon,
 					'-o'						=> $targetIcon,
 				))) {
-					$this->_error(sprintf('Optimization of icon "%s" failed, exiting', basename($targetIcon)));
+					$iconOptimized				= true;
+					
+				// Else: Error and fallback to the unoptimized SVG file 
+				} else {
+					$this->_error(sprintf('Optimization of icon "%s" with SVGO failed, skipping ...', basename($targetIcon)), false, 0);
 				}
+			}
 		
-			// Else
-			} elseif (!@copy($directory.DIRECTORY_SEPARATOR.$icon, $targetIcon)) {
+			// If the unoptimized SVG file is to be used
+			if (!$iconOptimized && !@copy($directory.DIRECTORY_SEPARATOR.$icon, $targetIcon)) {
 				$this->_error(sprintf('Could not copy icon "%s", exiting', basename($targetIcon)));
 			}
 			
@@ -1433,6 +1462,7 @@ class Iconizr {
 		}
 // 		echo $cmd."\n";
 		@exec($cmd, $output, $return);
+// 		echo $return."\n";
 		return !$return;
 	}
 	
@@ -1780,11 +1810,14 @@ class Iconizr {
 	 * Output an error message and exit
 	 * 
 	 * @param string $message				Message
+	 * @param int $exit						Exit with exit code
 	 * @return void
 	 */
-	protected function _error($message, $verbose = false) {
+	protected function _error($message, $verbose = false, $exit = 1) {
 		$this->_log('ERROR: '.$message, self::LOG_ERROR);
-		exit(1);
+		if (intval($exit) > 0) {
+			exit(intval($exit));
+		}
 	}
 	
 	/**
