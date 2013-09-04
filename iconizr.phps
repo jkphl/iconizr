@@ -1089,7 +1089,7 @@ class Iconizr {
 				}
 
 				// Write out the appropriate Sass rules
-				$sass[$directory.DIRECTORY_SEPARATOR.$name]				= ".$selectorDimensions {
+				$sass[$directory.DIRECTORY_SEPARATOR.$name]				= ".$sassSelector {
 	@extend %$prefix;
 	background-image: url('$spritePath');
 	background-position: 0 ".(-$viewboxHeight).($viewboxHeight ? 'px' : '').';

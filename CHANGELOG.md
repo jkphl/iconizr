@@ -1,3 +1,8 @@
+#### Bugs
+
+1.	Fixed CSS selector bug in Sass files for SVG sprites (#6)
+
+
 Beta 6 (2013-08-29)
 -------------------
 
