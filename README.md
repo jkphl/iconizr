@@ -150,6 +150,12 @@ Usage:
 	</tr>
 	<tr>
 		<td> </td>
+		<td><code>--padding</code></td>
+		<td>Integer</td>
+		<td>Transparent padding to be added around each icon (in pixels). Defaults to 0.</td>
+	</tr>
+	<tr>
+		<td> </td>
 		<td><code>--pseudo</code></td>
 		<td>String</td>
 		<td>You may bind an icon to a particular CSS pseudo class (like e.g. <code>:hover</code>, <code>:active</code>, <code>:target</code>). To do so, just append the desired pseudo class to the icon name, separated by a tilde <code>~</code>. For instance, an icon named <code>foo-bar~hover.svg</code> will result in a CSS class <code>icon-foo-bar:hover</code>. If you need to use another delimiter than a tilde <code>~</code>, just use this parameter to provide your custom string.</td>

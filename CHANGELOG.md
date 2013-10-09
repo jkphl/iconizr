@@ -1,6 +1,14 @@
+v0.1.0: First officially stable release
+---------------------------------------
+
 #### Bugs
 
 1.	Fixed CSS selector bug in Sass files for SVG sprites (#6)
+
+#### Enhancements / Features
+
+1.	Added support for transparent padding around icons
+2.	Upgraded to first non-beta release
 
 
 Beta 6 (2013-08-29)

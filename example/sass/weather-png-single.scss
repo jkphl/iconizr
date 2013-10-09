@@ -7,80 +7,80 @@
 	background-image: url('weather/weather-clear-night.png');
 }
 .icon-weather-clear-night-dims {
-	width: 48px;
-	height: 48px;
+	width: 88px;
+	height: 88px;
 }
 .icon-weather-clear {
 	@extend %icon;
 	background-image: url('weather/weather-clear.png');
 }
 .icon-weather-clear-dims {
-	width: 48px;
-	height: 48px;
+	width: 88px;
+	height: 88px;
 }
 .icon-weather-few-clouds-night {
 	@extend %icon;
 	background-image: url('weather/weather-few-clouds-night.png');
 }
 .icon-weather-few-clouds-night-dims {
-	width: 48px;
-	height: 48px;
+	width: 88px;
+	height: 88px;
 }
 .icon-weather-few-clouds {
 	@extend %icon;
 	background-image: url('weather/weather-few-clouds.png');
 }
 .icon-weather-few-clouds-dims {
-	width: 48px;
-	height: 48px;
+	width: 88px;
+	height: 88px;
 }
 .icon-weather-overcast {
 	@extend %icon;
 	background-image: url('weather/weather-overcast.png');
 }
 .icon-weather-overcast-dims {
-	width: 48px;
-	height: 48px;
+	width: 88px;
+	height: 88px;
 }
 .icon-weather-severe-alert {
 	@extend %icon;
 	background-image: url('weather/weather-severe-alert.png');
 }
 .icon-weather-severe-alert-dims {
-	width: 48px;
-	height: 48px;
+	width: 88px;
+	height: 88px;
 }
 .icon-weather-showers-scattered {
 	@extend %icon;
 	background-image: url('weather/weather-showers-scattered.png');
 }
 .icon-weather-showers-scattered-dims {
-	width: 48px;
-	height: 48px;
+	width: 88px;
+	height: 88px;
 }
 .icon-weather-showers {
 	@extend %icon;
 	background-image: url('weather/weather-showers.png');
 }
 .icon-weather-showers-dims {
-	width: 48px;
-	height: 48px;
+	width: 88px;
+	height: 88px;
 }
 .icon-weather-snow {
 	@extend %icon;
 	background-image: url('weather/weather-snow.png');
 }
 .icon-weather-snow-dims {
-	width: 48px;
-	height: 48px;
+	width: 88px;
+	height: 88px;
 }
 .icon-weather-storm {
 	@extend %icon;
 	background-image: url('weather/weather-storm.png');
 }
 .icon-weather-storm-dims {
-	width: 48px;
-	height: 48px;
+	width: 88px;
+	height: 88px;
 }
 .icon-weather-storm:hover,
 .icon-weather-storm\:hover {
@@ -89,6 +89,6 @@
 }
 .icon-weather-storm-dims:hover,
 .icon-weather-storm\:hover-dims {
-	width: 44px;
-	height: 49px;
+	width: 84px;
+	height: 89px;
 }

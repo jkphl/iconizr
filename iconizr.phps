@@ -48,6 +48,7 @@ class Iconizr {
 		'sassout'	=> null,
 		'python'	=> null,
 		'pseudo'	=> self::PSEUDO_SPLIT,
+		'padding'	=> 0,
 	);
 	/**
 	 * Supporting binaries
@@ -244,6 +245,12 @@ class Iconizr {
 	 */
 	protected $_maxheight = self::DEFAULT_MAXLENGTH;
 	/**
+	 * Padding around the icons (pixel)
+	 * 
+	 * @var int
+	 */
+	protected $_padding = 0;
+	/**
 	 * Logging group (indentation level)
 	 * 
 	 * @var int
@@ -328,6 +335,12 @@ class Iconizr {
 	 */
 	const DEFAULT_MAXLENGTH = 1000;
 	/**
+	 * Default padding around the icons (pixel)
+	 * 
+	 * @var int
+	 */
+	const DEFAULT_PADDING = 0;
+	/**
 	 * Character sequence for denoting pseudo-selectors
 	 * 
 	 * @var string
@@ -411,6 +424,7 @@ class Iconizr {
 				'height=i'						=> 'Default icon height (if SVG is missing a height value; defaults to '.self::DEFAULT_LENGTH.' pixels)',
 				'maxwidth=i'					=> 'Maximum icon width, default: '.self::DEFAULT_MAXLENGTH.' pixels',
 				'maxheight=i'					=> 'Maximum icon height, default: '.self::DEFAULT_MAXLENGTH.' pixels',
+				'padding=i'						=> 'Transparent padding around the icons (in pixel), default: '.self::DEFAULT_PADDING.' pixels',
 				'svg=i'							=> 'Data URI byte threshold for SVG files, default: '.self::DEFAULT_THRESHOLD_SVG,
 				'png=i'							=> 'Data URI byte threshold for PNG files, default: '.self::DEFAULT_THRESHOLD_PNG,
 				'pseudo=s'						=> 'Character sequence for denoting CSS pseudo classes, default: '.self::PSEUDO_SPLIT,
@@ -466,6 +480,7 @@ class Iconizr {
 		$this->_height							= max(1, min(1000, intval($options['height'])));
 		$this->_maxwidth						= max($this->_width, intval($options['maxwidth']));
 		$this->_maxheight						= max($this->_width, intval($options['maxheight']));
+		$this->_padding							= max($this->_padding, intval($options['padding']));
 		
 		// Determine quantize speed, optimization level and other flags
 		$level									= max(0, min(11, intval($options['level']))) - 1;
@@ -1509,6 +1524,26 @@ class Iconizr {
 		file_put_contents($file, preg_replace("%[\r\n]+%", '', file_get_contents($file)));
 		$icon								= $this->_loadSVG($file);
 		list($iconWidth, $iconHeight)		= $this->_getIconDimensions($directory, $icon, $name);
+		
+		// If a global icon padding should be applied
+		if ($this->_padding > 0) {
+			$viewBox									= array(0, 0, $iconWidth, $iconHeight);
+			foreach (($icon->documentElement->hasAttribute('viewBox') ? preg_split('%\s+%', trim($icon->documentElement->getAttribute('viewBox'))) : array()) as $index => $value) {
+				if (strlen($value)) {
+					$viewBox[$index]					= floatval($value);
+				}
+			}
+			$iconWidth									+= 2 * $this->_padding;	
+			$iconHeight									+= 2 * $this->_padding;	
+			$this->_dimensions[$directory][$name]		= array($iconWidth, $iconHeight);
+			
+			$viewBox[0]									-= $this->_padding;
+			$viewBox[1]									-= $this->_padding;
+			$viewBox[2]									+= 2 * $this->_padding;
+			$viewBox[3]									+= 2 * $this->_padding;
+			$icon->documentElement->setAttribute('viewBox', implode(' ', $viewBox));
+		}
+		
 		$icon->documentElement->setAttribute('width', $iconWidth);
 		$icon->documentElement->setAttribute('height', $iconHeight);
 		
