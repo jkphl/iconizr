@@ -1,3 +1,11 @@
+v0.1.1: License change to MIT
+---------------------------------------
+
+#### Enhancements / Features
+
+1.	Switched license to MIT (#7)
+
+
 v0.1.0: First officially stable release
 ---------------------------------------
 

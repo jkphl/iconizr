@@ -318,6 +318,8 @@ Resources on SVG support:
 
 Legal
 -----
-*iconizr* by [Joschi Kuphal](http://joschi.kuphal.net) is licensed under a [Creative Commons Attribution 3.0 Unported License](http://creativecommons.org/licenses/by/3.0/). Follow [@jkphl](http://twitter.com/jkphl) on Twitter to keep updated.
+Copyright © 2013 Joschi Kuphal <joschi@kuphal.net> / [@jkphl](https://twitter.com/jkphl)
+
+As of version 0.1.1, *iconizr* is licensed under the terms of the [MIT license](LICENSE.txt). Before that, a [Creative Commons Attribution 3.0 Unported License](http://creativecommons.org/licenses/by/3.0/) applied.
 
 The contained example SVG icons are part of the [Tango Icon Library](http://tango.freedesktop.org/Tango_Icon_Library) and belong to the Public Domain.
