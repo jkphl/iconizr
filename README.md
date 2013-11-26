@@ -216,6 +216,17 @@ The storm icon included in this package is an example for an icon with hover sta
 
 In the [HTML preview documents](example/css/weather-preview.html) both icons will be shown, but also if you hover over the regular one, you will see it's hover state as well.
 
+For every pseudo class *iconizr* also adds an additional CSS selector which you can use to explicitly apply the stateful icon styles to an element (independently from the element's real state). Starting with version v0.1.2 *iconizr* even adds such a selector for the *regular* icon state (which doesn't have a pseudo class by design), so you can also use this icon variant without letting the other pseudo classes become effective:
+
+		icon-foo-bar, icon-foo-bar\:regular { ... }
+		icon-foo-bar:hover, icon-foo-bar\:hover { ... }
+		
+To apply these icon styles to HTML elements just use them like this:
+
+		<span class="icon-foo-bar:regular">Regular icon state</span>
+		<span class="icon-foo-bar:hover">Hover icon state</span>
+		
+It may seem weird to use colons als parts of CSS class names, but in fact it's perfectly legal – you just have to escape the colons in your CSS files using a backslash `\`.
 
 Comparison to grunticon
 -----------------------

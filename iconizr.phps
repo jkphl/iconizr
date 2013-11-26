@@ -1091,10 +1091,12 @@ class Iconizr {
 					$selectorSuffix										= ':'.substr($name, $pseudoClassPos + 1).',.'.$selector.'\\:'.substr($name, $pseudoClassPos + 1);
 					$selectorDimensions									.= "$selectorSuffix-dims";
 				} else {
-					$selector											=
-					$sassSelector										= "$prefix-$name";
+					$selector											= "$prefix-$name";
 					$selectorDimensions									=
 					$sassSelectorDimensions								= "$selector-dims";
+					$sassSelector										= "$selector,
+.$selector\\:regular";
+					$selector											.= ",.$selector\\:regular";
 				}
 				
 				// Write out the appropriate CSS rules
@@ -1209,10 +1211,12 @@ class Iconizr {
 				$selectorSuffix										= ':'.substr($name, $pseudoClassPos + 1).',.'.$selector.'\\:'.substr($name, $pseudoClassPos + 1);
 				$selectorDimensions									.= "$selectorSuffix-dims";
 			} else {
-				$selector											=
-				$sassSelector										= "$prefix-$name";
+				$selector											= "$prefix-$name";
 				$selectorDimensions									=
 				$sassSelectorDimensions								= "$selector-dims";
+				$sassSelector										= "$selector,
+.$selector\\:regular";
+				$selector											.= ",.$selector\\:regular";
 			}
 			
 			// Merge the icon with the sprite
@@ -1300,6 +1304,7 @@ class Iconizr {
 			} else {
 				$selector											= "$prefix-$name";
 				$selectorDimensions									= "$selector-dims";
+				$selector											.= ",.$selector\\:regular";
 			}
 			
 			$css[$directory.DIRECTORY_SEPARATOR.$name]				= ".$selector{background-image:url('".substr($icon, strlen($this->_target))."');background-repeat:no-repeat}";
@@ -1336,6 +1341,7 @@ class Iconizr {
 			} else {
 				$selector											= "$prefix-$name";
 				$selectorDimensions									= "$selector-dims";
+				$selector											.= ",.$selector\\:regular";
 			}
 			
 			$css[$directory.DIRECTORY_SEPARATOR.$name]				= ".$selector{background-image:url('$icon');background-repeat:no-repeat}";
@@ -1378,6 +1384,7 @@ class Iconizr {
 			} else {
 				$selector											= "$prefix-$name";
 				$selectorDimensions									= "$selector-dims";
+				$selector											.= ",.$selector\\:regular";
 			}
 			
 			$sass[$directory.DIRECTORY_SEPARATOR.$name]				= ".$selector {
@@ -1426,6 +1433,7 @@ class Iconizr {
 			} else {
 				$selector											= "$prefix-$name";
 				$selectorDimensions									= "$selector-dims";
+				$selector											.= ",.$selector\\:regular";
 			}
 			
 			$sass[$directory.DIRECTORY_SEPARATOR.$name]				= ".$selector {
@@ -1475,9 +1483,7 @@ class Iconizr {
 				$cmd			.= ' '.$value;
 			}
 		}
-// 		echo $cmd."\n";
 		@exec($cmd, $output, $return);
-// 		echo $return."\n";
 		return !$return;
 	}
 	

@@ -2,85 +2,85 @@
 %icon {
 	background-repeat: no-repeat
 }
-.icon-weather-clear-night {
+.icon-weather-clear-night,.icon-weather-clear-night\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-clear-night.png');
 }
 .icon-weather-clear-night-dims {
-	width: 88px;
-	height: 88px;
+	width: 48px;
+	height: 48px;
 }
-.icon-weather-clear {
+.icon-weather-clear,.icon-weather-clear\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-clear.png');
 }
 .icon-weather-clear-dims {
-	width: 88px;
-	height: 88px;
+	width: 48px;
+	height: 48px;
 }
-.icon-weather-few-clouds-night {
+.icon-weather-few-clouds-night,.icon-weather-few-clouds-night\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-few-clouds-night.png');
 }
 .icon-weather-few-clouds-night-dims {
-	width: 88px;
-	height: 88px;
+	width: 48px;
+	height: 48px;
 }
-.icon-weather-few-clouds {
+.icon-weather-few-clouds,.icon-weather-few-clouds\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-few-clouds.png');
 }
 .icon-weather-few-clouds-dims {
-	width: 88px;
-	height: 88px;
+	width: 48px;
+	height: 48px;
 }
-.icon-weather-overcast {
+.icon-weather-overcast,.icon-weather-overcast\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-overcast.png');
 }
 .icon-weather-overcast-dims {
-	width: 88px;
-	height: 88px;
+	width: 48px;
+	height: 48px;
 }
-.icon-weather-severe-alert {
+.icon-weather-severe-alert,.icon-weather-severe-alert\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-severe-alert.png');
 }
 .icon-weather-severe-alert-dims {
-	width: 88px;
-	height: 88px;
+	width: 48px;
+	height: 48px;
 }
-.icon-weather-showers-scattered {
+.icon-weather-showers-scattered,.icon-weather-showers-scattered\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-showers-scattered.png');
 }
 .icon-weather-showers-scattered-dims {
-	width: 88px;
-	height: 88px;
+	width: 48px;
+	height: 48px;
 }
-.icon-weather-showers {
+.icon-weather-showers,.icon-weather-showers\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-showers.png');
 }
 .icon-weather-showers-dims {
-	width: 88px;
-	height: 88px;
+	width: 48px;
+	height: 48px;
 }
-.icon-weather-snow {
+.icon-weather-snow,.icon-weather-snow\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-snow.png');
 }
 .icon-weather-snow-dims {
-	width: 88px;
-	height: 88px;
+	width: 48px;
+	height: 48px;
 }
-.icon-weather-storm {
+.icon-weather-storm,.icon-weather-storm\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-storm.png');
 }
 .icon-weather-storm-dims {
-	width: 88px;
-	height: 88px;
+	width: 48px;
+	height: 48px;
 }
 .icon-weather-storm:hover,
 .icon-weather-storm\:hover {
@@ -89,6 +89,6 @@
 }
 .icon-weather-storm-dims:hover,
 .icon-weather-storm\:hover-dims {
-	width: 84px;
-	height: 89px;
+	width: 44px;
+	height: 49px;
 }

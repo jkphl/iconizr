@@ -1,5 +1,13 @@
+v0.1.2: Additional CSS selectors for default icon states
+--------------------------------------------------------
+
+#### Enhancements / Features
+
+1.	Introduced additional CSS selectors for icons in their default »regular« state (#11)
+
+
 v0.1.1: License change to MIT
----------------------------------------
+-----------------------------
 
 #### Enhancements / Features
 
