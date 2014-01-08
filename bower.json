@@ -1,0 +1,26 @@
+{
+  "name": "iconizr",
+  "version": "1.0.0",
+  "homepage": "http://iconizr.com",
+  "description": "A PHP command line tool for converting SVG images to a set of CSS icons (SVG & PNG, single icons and / or CSS sprites) with support for image optimization and Sass output",
+  "main": "iconizr.phps",
+  "keywords": [
+    "svg", "png", "css", "sass", "icon", "sprite", "generator", "data uri", "performance", "vector", "retina", "scalable", "svgo", "scour", "optimize", "pngcrush", "optipng", "pngquant", "grunticon", "mobile", "php"
+  ],
+  "authors": [
+    "Joschi Kuphal <joschi@kuphal.net>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "example",
+    "src",
+    "Gruntfile.js",
+    "composer.json",
+    "package.json"
+  ]
+}

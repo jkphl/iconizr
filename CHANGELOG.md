@@ -1,3 +1,12 @@
+v1.0.0: Optimized loader fragment
+---------------------------------
+
+#### Enhancements / Features
+
+1.	Slightly optimized the loader fragment JavaScript
+2.	Added support for [Bower](http://bower.io) and [Composer](http://getcomposer.org)
+
+
 v0.1.2: Additional CSS selectors for default icon states
 --------------------------------------------------------
 
