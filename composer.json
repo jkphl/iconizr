@@ -1,0 +1,26 @@
+{
+  "name" : "jkphl/iconizr",
+  "description" : "A PHP command line tool for converting SVG images to a set of CSS icons (SVG & PNG, single icons and / or CSS sprites) with support for image optimization and Sass output",
+  "repositories" : [ {
+    "type" : "composer",
+    "url" : "https://packagist.org/"
+  }, {
+    "type" : "vcs",
+    "url" : "https://github.com/jkphl/iconizr"
+  } ],
+  "authors" : [ {
+    "name" : "Joschi Kuphal",
+    "email" : "joschi@kuphal.net",
+    "homepage" : "http://jkphl.is",
+    "role" : "Developer"
+  } ],
+  "support" : {
+    "email" : "joschi@kuphal.net",
+    "issues" : "https://github.com/jkphl/iconizr/issues",
+    "source" : "https://github.com/jkphl/iconizr"
+  },
+  "keywords" : [ "svg", "png", "css", "sass", "icon", "sprite", "generator", "data uri", "performance", "vector", "retina", "scalable", "svgo", "scour", "optimize", "pngcrush", "optipng", "pngquant", "grunticon", "mobile", "php" ],
+  "license" : "MIT",
+  "type" : "library",
+  "homepage" : "http://iconizr.com"
+}
