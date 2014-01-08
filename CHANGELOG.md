@@ -1,3 +1,11 @@
+v1.0.1: Fixed error in bower.json
+---------------------------------
+
+#### Bugs
+
+1.	Fixed error in bower.json
+
+
 v1.0.0: Optimized loader fragment
 ---------------------------------
 
