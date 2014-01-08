@@ -329,7 +329,7 @@ Resources on SVG support:
 
 Legal
 -----
-Copyright © 2013 Joschi Kuphal <joschi@kuphal.net> / [@jkphl](https://twitter.com/jkphl)
+Copyright © 2014 Joschi Kuphal <joschi@kuphal.net> / [@jkphl](https://twitter.com/jkphl)
 
 As of version 0.1.1, *iconizr* is licensed under the terms of the [MIT license](LICENSE.txt). Before that, a [Creative Commons Attribution 3.0 Unported License](http://creativecommons.org/licenses/by/3.0/) applied.
 

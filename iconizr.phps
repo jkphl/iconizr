@@ -622,9 +622,8 @@ class Iconizr {
 		
 		// Prepare the loader script fragment 
 		$this->_log('Creating the stylesheet loader fragment', self::LOG_CREATE);
-		$loader														= '<script type="text/javascript">';
-		$loader														.= '/* iconizr | https://github.com/jkphl/iconizr | © '.date('Y').' Joschi Kuphal | CC BY 3.0 */';
-		$loader														.= file_get_contents(__DIR__.DIRECTORY_SEPARATOR.'iconizr.min.js');
+		$loader														= '<script type="text/javascript" title="https://iconizr.com | © '.date('Y').' Joschi Kuphal | MIT">';
+		$loader														.= file_get_contents(__DIR__.DIRECTORY_SEPARATOR.'src'.DIRECTORY_SEPARATOR.'iconizr.min.js');
 		$loader														.= '</script>';
 		$loader														.= '<noscript><link href="'.$this->_embed.htmlspecialchars($css[self::PNG][self::SPRITE]).'" rel="stylesheet" type="text/css" media="all"></noscript>';
 		file_put_contents($this->_target.$this->_flags['css'].'-loader-fragment.html', sprintf($loader, $this->_embed.htmlspecialchars($css[self::PNG][self::SPRITE]), $this->_embed.htmlspecialchars($css[self::PNG][self::DATA]), $this->_embed.htmlspecialchars($css[self::SVG][self::SPRITE]), $this->_embed.htmlspecialchars($css[self::SVG][self::DATA])));
@@ -1384,7 +1383,8 @@ class Iconizr {
 			} else {
 				$selector											= "$prefix-$name";
 				$selectorDimensions									= "$selector-dims";
-				$selector											.= ",.$selector\\:regular";
+				$selector											.= ",
+.$selector\\:regular";
 			}
 			
 			$sass[$directory.DIRECTORY_SEPARATOR.$name]				= ".$selector {
@@ -1433,7 +1433,8 @@ class Iconizr {
 			} else {
 				$selector											= "$prefix-$name";
 				$selectorDimensions									= "$selector-dims";
-				$selector											.= ",.$selector\\:regular";
+				$selector											.= ",
+.$selector\\:regular";
 			}
 			
 			$sass[$directory.DIRECTORY_SEPARATOR.$name]				= ".$selector {

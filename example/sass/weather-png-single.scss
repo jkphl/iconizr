@@ -2,7 +2,8 @@
 %icon {
 	background-repeat: no-repeat
 }
-.icon-weather-clear-night,.icon-weather-clear-night\:regular {
+.icon-weather-clear-night,
+.icon-weather-clear-night\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-clear-night.png');
 }
@@ -10,7 +11,8 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-clear,.icon-weather-clear\:regular {
+.icon-weather-clear,
+.icon-weather-clear\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-clear.png');
 }
@@ -18,7 +20,8 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-few-clouds-night,.icon-weather-few-clouds-night\:regular {
+.icon-weather-few-clouds-night,
+.icon-weather-few-clouds-night\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-few-clouds-night.png');
 }
@@ -26,7 +29,8 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-few-clouds,.icon-weather-few-clouds\:regular {
+.icon-weather-few-clouds,
+.icon-weather-few-clouds\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-few-clouds.png');
 }
@@ -34,7 +38,8 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-overcast,.icon-weather-overcast\:regular {
+.icon-weather-overcast,
+.icon-weather-overcast\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-overcast.png');
 }
@@ -42,7 +47,8 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-severe-alert,.icon-weather-severe-alert\:regular {
+.icon-weather-severe-alert,
+.icon-weather-severe-alert\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-severe-alert.png');
 }
@@ -50,7 +56,8 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-showers-scattered,.icon-weather-showers-scattered\:regular {
+.icon-weather-showers-scattered,
+.icon-weather-showers-scattered\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-showers-scattered.png');
 }
@@ -58,7 +65,8 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-showers,.icon-weather-showers\:regular {
+.icon-weather-showers,
+.icon-weather-showers\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-showers.png');
 }
@@ -66,7 +74,8 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-snow,.icon-weather-snow\:regular {
+.icon-weather-snow,
+.icon-weather-snow\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-snow.png');
 }
@@ -74,7 +83,8 @@
 	width: 48px;
 	height: 48px;
 }
-.icon-weather-storm,.icon-weather-storm\:regular {
+.icon-weather-storm,
+.icon-weather-storm\:regular {
 	@extend %icon;
 	background-image: url('weather/weather-storm.png');
 }
