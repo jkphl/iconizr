@@ -412,11 +412,11 @@ class Iconizr {
 		// Parse & validate the command line options
 		try {
 			$this->_options						= new \Zend\Console\Getopt(array(
-				'out|o=s'						=> 'Output directory',
+				'out|o=s'						=> 'Output directory for the CSS files and the icons subdirectory',
 				'sassout=s'						=> 'Optional separate output directory for Sass files',
 				'css|c-s'						=> 'Render CSS files (optionally provide a CSS file prefix, default: iconizr)',
 				'sass|s-s'						=> 'Render Sass files (optionally provide a Sass file prefix, default: iconizr)',
-				'prefix|p=s'					=> 'CSS class prefix (default: '.self::DEFAULT_PREFIX.')',
+				'prefix|p=s'					=> 'CSS selector prefix (default: '.self::DEFAULT_PREFIX.')',
 				'level|l=i'						=> 'PNG image optimization level: 0 (no optimization), 1 (fast & rough) - 11 (slow & high quality), default: '.self::DEFAULT_LEVEL,
 				'quantize|q'					=> 'Quantize PNG images (reduce to 8-bit color depth)',
 				'embed|e=s'						=> 'Prefix to the CSS directory path for embedding the stylesheets into your HTML documents (default: no prefix, use output directory as root-relative path)',
@@ -428,8 +428,8 @@ class Iconizr {
 				'svg=i'							=> 'Data URI byte threshold for SVG files, default: '.self::DEFAULT_THRESHOLD_SVG,
 				'png=i'							=> 'Data URI byte threshold for PNG files, default: '.self::DEFAULT_THRESHOLD_PNG,
 				'pseudo=s'						=> 'Character sequence for denoting CSS pseudo classes, default: '.self::PSEUDO_SPLIT,
-				'dims|d'						=> 'Render icon dimensions in CSS and Sass files',
-				'keep|k'						=> 'Keep intermediate SVG and PNG files',
+				'dims|d'						=> 'Render icon dimensions as separate CSS and / or Sass rules',
+				'keep|k'						=> 'Keep intermediate SVG and PNG files (inside the sprite subdirectory)',
 				'verbose|v-i'					=> 'Output verbose progress information',
 				'scour=s'						=> 'Absolute path to scour script for cleaning SVG files (see http://www.codedread.com/scour)',
 				'python=s'						=> 'Absolute path to Python 2 binary (only necessary if another Python version is the machine default)',

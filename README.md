@@ -311,6 +311,13 @@ For PNG optimization you should have as many of the following as possible:
 *	[OptiPNG](http://optipng.sourceforge.net)
 
 
+Other versions
+--------------
+I'm currently working on a native Node.js / Grunt / Gulp.js implementation of *iconizr*. As a first step, I published [svg-sprite](https://npmjs.org/package/svg-sprite) (respectively [grunt-svg-sprite](https://github.com/jkphl/grunt-svg-sprite)) which will be the SVG sprite generator component. As opposed to the PHP based *iconizr*, svg-sprite comes with several improvements like [Mustache](http://mustache.github.io) template based output, so you can produce customized CSS output (formats). I plan to backport these improvements to the PHP based version as well.
+
+Also, I'm very happy to announce that [Haithem Bel Haj](https://github.com/haithembelhaj) published an [iconizr Grunt plugin](https://github.com/haithembelhaj/grunt-iconizr-php) that's based on the PHP based version of *iconizr*, so you can start using *iconizr* with Grunt right away! Cool, huh?
+
+
 Resources
 ---------
 There are some useful resources on data URIs in general:
