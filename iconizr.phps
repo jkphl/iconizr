@@ -1584,11 +1584,12 @@ class Iconizr {
 	protected function _optimizePNGImages(array $pngs) {
 		$suffix								= '';
 		$suffices							= array();
+		$optimized							= 0;
 		$pngFilenames						= array();
 		foreach ($pngs as $png) {
 			$pngFilenames[$png]				= pathinfo($png, PATHINFO_FILENAME);
 		}
-			
+		
 		// If pngcrush is available
 		if ($this->_binaries['pngcrush']) {
 			$this->_logGroupStart('Optimizing using "pngcrush" ...');
@@ -1610,6 +1611,7 @@ class Iconizr {
 			}
 			$pngs							= $this->_mapFileExtension($pngFilenames, $suffix);
 			$this->_logGroupEnd();
+			++$optimized;
 		}
 			
 		// If pngquant is available
@@ -1645,6 +1647,7 @@ class Iconizr {
 				}
 			}
 			$this->_logGroupEnd();
+			++$optimized;
 		}
 		
 		// If optipng is available
@@ -1686,6 +1689,12 @@ class Iconizr {
 				}
 			}
 			$this->_logGroupEnd();
+			++$optimized;
+		}
+		
+		// If no optimization could be applied
+		if (!$optimized) {
+			$pngs							= $this->_mapFileExtension($pngFilenames, '');
 		}
 		
 		return $pngs;
